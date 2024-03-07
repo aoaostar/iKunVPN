@@ -8,6 +8,7 @@ const isProduction = !Boolean(process.env.VITE_DEV_SERVER_URL)
 export default defineConfig({
     plugins: [
         react(),
+
         electron({
             main: {
                 entry: "app/main/main.ts",
@@ -17,7 +18,7 @@ export default defineConfig({
                         outDir: "build/electron",
                         minify: isProduction,
                         rollupOptions: {
-                            external: [/node_modules/],
+                            external: ["sqlite3"],
                         },
                     },
                 },
@@ -28,9 +29,6 @@ export default defineConfig({
                     build: {
                         outDir: "build/electron",
                         minify: isProduction,
-                        rollupOptions: {
-                            external: [/node_modules/],
-                        },
                     },
                 },
             },
