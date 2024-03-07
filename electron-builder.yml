@@ -1,0 +1,34 @@
+appId: "com.aoaostar.ikunvpn"
+productName: "iKunVPN"
+icon: "../public/logo.png"
+publish:
+  - provider: github
+    owner: aoaostar
+    repo: iKunVPN
+    releaseType: release
+files:
+  - "package.json"
+  - from: "../build"
+    to: "build"
+    filter: "**/*"
+extraResources:
+  - from: "extra"
+    to: "extra"
+    filter: "**/*"
+directories:
+  output: "dist"
+nsis:
+  oneClick: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: "iKunVPN"
+win:
+  requestedExecutionLevel: requireAdministrator
+  target:
+    - nsis
+mac:
+  target: [ ]
+linux:
+  target: [ ]

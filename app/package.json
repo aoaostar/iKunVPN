@@ -1,0 +1,13 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "main": "build/electron/main.js",
+  "author": "Pluto",
+  "description": "iKun的OpenVPN客户端",
+  "scripts": {},
+  "dependencies": {
+    "sqlite3": "^5.1.7",
+    "otp": "^1.1.2",
+    "electron-updater": "^6.1.8"
+  }
+}
