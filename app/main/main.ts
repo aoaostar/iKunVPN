@@ -7,6 +7,7 @@ import { IS_PRODUCTION, ProgramInfo } from "./const.ts"
 import initIpcMain from "./ipc_main"
 import initUpdate from "./autoupdater"
 import { autoUpdater } from "electron-updater"
+import { setup_db } from "./db/db"
 
 const appPath = app.getAppPath()
 
@@ -77,7 +78,8 @@ if (!singleInstanceLock) {
     app.quit()
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+    await setup_db()
     initUpdate()
     createWindow()
 

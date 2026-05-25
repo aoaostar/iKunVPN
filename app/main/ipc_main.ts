@@ -1,5 +1,5 @@
 import Vpn from "./db/vpn"
-import Connect from "./connect"
+import Connections from "./connections"
 import { ipcMain } from "electron"
 
 export default function initIpcMain() {
@@ -19,22 +19,25 @@ export default function initIpcMain() {
         return await Vpn.update(id, params)
     })
 
-    ipcMain.handle("db/vpn/delete", async (_, id) => {
+    ipcMain.handle("db/vpn/delete", async (_, id: string) => {
         return await Vpn.delete(id)
     })
 
-    ipcMain.handle("connect/start", async (_, id) => {
-        return await Connect.start(id)
+    ipcMain.handle("connections/connect", async (_, id: string) => {
+        return await Connections.connect(id)
     })
 
-    ipcMain.handle("connect/stop", async (_) => {
-        return await Connect.stop()
+    ipcMain.handle("connections/disconnect", async (_, id: string) => {
+        return await Connections.disconnect(id)
     })
 
-    ipcMain.handle("connect/status", async (_) => {
-        return await Connect.status()
+    ipcMain.handle("connections/status", async (_, id: string) => {
+        return await Connections.status(id)
     })
-    ipcMain.handle("connect/logs", (_) => {
-        return Connect.logs()
+    ipcMain.handle("connections/logs", async (_, id: string) => {
+        return await Connections.logs(id)
+    })
+    ipcMain.handle("connections/showAdapters", async (_) => {
+        return await Connections.showAdapters()
     })
 }

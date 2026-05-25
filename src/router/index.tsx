@@ -1,7 +1,7 @@
 import { createHashRouter } from "react-router-dom"
-import Home from "../pages/Home.tsx"
-import Detail from "../pages/Detail.tsx"
-import Create from "../pages/Create.tsx"
+import Home from "@/pages/Home.tsx"
+import Detail from "@/pages/Detail.tsx"
+import Create from "@/pages/Create.tsx"
 
 export const globalRouters = createHashRouter([
     {

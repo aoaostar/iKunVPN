@@ -1,29 +1,28 @@
-import { VPNDetail } from "../components/VPNList.tsx"
-import { VpnCreate, VpnUpdate } from "../api/vpn.ts"
-import { StatusResponse } from "@/api/connect.ts"
+import { VPNDetail } from "@/components/VPNList.tsx"
+import { VpnCreate, VpnUpdate } from "@/api/vpn.ts"
 
 export interface IDb {
     vpn: IVpn
 }
 
-export interface IConnect {
-    start: (id: number) => Promise
-    status: () => Promise<StatusResponse>
-    stop: () => Promise
-    logs: () => Promise<string[]>
+export interface IConnections {
+    connect: (id: string) => Promise
+    disconnect: (id: string) => Promise
+    status: (id: string) => Promise<Status>
+    logs: (id: string) => Promise<string[]>
 }
 
 export interface IVpn {
     all: () => Promise<VPNDetail[]>
-    get: (id: number) => Promise<VPNDetail>
+    get: (id: string) => Promise<VPNDetail>
     create: (params: VpnCreate) => Promise<VPNDetail>
-    update: (id: number, params: VpnUpdate) => Promise<VPNDetail>
-    delete: (id: number) => Promise<boolean>
+    update: (id: string, params: VpnUpdate) => Promise<VPNDetail>
+    delete: (id: string) => Promise<boolean>
 }
 
 export interface IElectronAPI {
     db: IDb
-    connect: IConnect
+    connections: IConnections
     receive: (channel: string, func: (...args) => void) => Promise<void>
     removeAllListeners: (channel: string) => Promise<void>
 }

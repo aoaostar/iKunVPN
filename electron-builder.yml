@@ -1,6 +1,6 @@
 appId: "com.aoaostar.ikunvpn"
 productName: "iKunVPN"
-icon: "../public/logo.png"
+icon: "public/logo.png"
 publish:
   - provider: github
     owner: aoaostar
@@ -8,7 +8,7 @@ publish:
     releaseType: release
 files:
   - "package.json"
-  - from: "../build"
+  - from: "build"
     to: "build"
     filter: "**/*"
 extraResources:

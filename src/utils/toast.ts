@@ -1,4 +1,4 @@
-import { createStandaloneToast } from "@chakra-ui/react"
+import { createStandaloneToast, ToastId } from "@chakra-ui/react"
 
 const { toast } = createStandaloneToast({
     defaultOptions: {
@@ -9,6 +9,7 @@ const { toast } = createStandaloneToast({
 })
 
 const Toast = {
+    toast: toast,
     success(title: string, message: string = "") {
         return toast({
             title: title,
@@ -29,6 +30,24 @@ const Toast = {
             description: message,
             status: "warning",
         })
+    },
+    info(title: string, message: string = "") {
+        return toast({
+            title: title,
+            description: message,
+            status: "info",
+        })
+    },
+    loading(title: string, message: string = "") {
+        return toast({
+            title: title,
+            description: message,
+            status: "loading",
+            duration: null,
+        })
+    },
+    close(id: ToastId) {
+        return toast.close(id)
     },
 }
 export default Toast

@@ -1,76 +1,32 @@
 import Db from "./db.ts"
+import { VPNSchema } from "./schemas"
+import { nanoid } from "nanoid"
 
 export default class Vpn {
     static async all() {
-        const data: any = await Db.all("select * from vpn")
-        for (const d of data) {
-            try {
-                d.otp_config = JSON.parse(d.otp_config)
-            } catch (e) {}
-        }
-        return data
+        return Db.data.vpn
     }
 
-    static async get(id: number) {
-        const data: any = await Db.get("select * from vpn where id = ?", [id])
-        try {
-            data.otp_config = JSON.parse(data.otp_config)
-        } catch (e) {
-            data.otp_config = {
-                secret: "",
-                step: 0,
-            }
-        }
-        return data
+    static async get(id: string) {
+        return Db.data.vpn.find((v) => v.id === id)
     }
 
-    static async create(params: any): Promise<any> {
-        return await Db.execute(
-            `
-                insert into vpn (mark, username, password, ovpn, otp_config)
-                values (?, ?, ?, ?, ?)
-            `,
-            [
-                params.mark,
-                params.username,
-                params.password,
-                params.ovpn,
-                JSON.stringify(params.otp_config),
-            ]
-        )
+    static async create(item: Omit<VPNSchema, "id">): Promise<any> {
+        Db.data.vpn.push({
+            ...item,
+            id: nanoid(),
+        })
+        await Db.write()
     }
 
-    static async update(id: number, params: any) {
-        const data = await Db.execute(
-            `
-                update vpn
-                set mark       = ?,
-                    username   = ?,
-                    password   = ?,
-                    ovpn       = ?,
-                    otp_config = ?
-                where id = ?
-            `,
-            [
-                params.mark,
-                params.username,
-                params.password,
-                params.ovpn,
-                JSON.stringify(params.otp_config),
-                id,
-            ]
-        )
-        return data
+    static async update(id: string, item: Omit<VPNSchema, "id">) {
+        console.log("update",item)
+        Db.data.vpn = Db.data.vpn.map((v) => (v.id === id ? { ...v, ...item } : v))
+        await Db.write()
     }
 
-    static async delete(id: number) {
-        return await Db.delete(
-            `
-                delete
-                from vpn
-                where id = ?
-            `,
-            [id]
-        )
+    static async delete(id: string) {
+        Db.data.vpn = Db.data.vpn.filter((obj) => obj.id !== id)
+        await Db.write()
     }
 }

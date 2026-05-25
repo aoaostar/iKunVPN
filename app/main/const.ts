@@ -12,3 +12,5 @@ export const RESOURCE_PATH = IS_PRODUCTION
 export const ProgramInfo = {
     title: "iKunVPN",
 }
+export const USER_DATA_PATH = app.getPath("userData")
+export const RUNTIME_PATH = path.resolve(USER_DATA_PATH, `runtime`)

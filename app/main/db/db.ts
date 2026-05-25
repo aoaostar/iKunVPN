@@ -1,49 +1,26 @@
 import path from "path"
-import { verbose } from "sqlite3"
-import { RESOURCE_PATH } from "../const.ts"
+import {  USER_DATA_PATH } from "../const"
+import { JSONFile } from "lowdb/node"
+import { Low } from "lowdb"
+import lodash from "lodash"
+import { DatabaseSchema } from "./schemas"
 
-const sqlite3 = verbose()
-console.log(
-    'path.join(RESOURCE_PATH, "extra/database.db")',
-    path.join(RESOURCE_PATH, "extra/database.db")
-)
-const db = new sqlite3.Database(path.join(RESOURCE_PATH, "extra/database.db"))
+const dbPath = path.join(USER_DATA_PATH, "db.json")
 
-export default class Db {
-    static async all(sql: string, params = []) {
-        return new Promise((resolve, reject) => {
-            db.all(sql, params, (err, rows) => {
-                if (err) {
-                    reject(err)
-                }
-                resolve(rows)
-            })
-        })
-    }
+console.log("dbPath: ", dbPath)
 
-    static async get(sql: string, params: number[] = []) {
-        return new Promise((resolve, reject) => {
-            db.get(sql, params, (err, rows) => {
-                if (err) {
-                    reject(err)
-                }
-                resolve(rows)
-            })
-        })
-    }
-
-    static async execute(sql: string, params: any = []) {
-        return new Promise((resolve, reject) => {
-            db.run(sql, params, (err: any, rows: any) => {
-                if (err) {
-                    reject(err)
-                }
-                resolve(rows)
-            })
-        })
-    }
-
-    static async delete(sql: string, params: number[] = []) {
-        return await Db.execute(sql, params)
-    }
+class LowWithLodash<T> extends Low<T> {
+    chain: lodash.ExpChain<this["data"]> = lodash.chain(this).get("data")
 }
+
+const defaultData: DatabaseSchema = {
+    vpn: [],
+}
+const adapter = new JSONFile<DatabaseSchema>(dbPath)
+
+const Db = new LowWithLodash(adapter, defaultData)
+
+export const setup_db = async ()=>{
+    await Db.read()
+}
+export default Db

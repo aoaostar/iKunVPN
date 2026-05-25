@@ -14,12 +14,15 @@ import {
     FormErrorMessage,
     FormLabel,
     Input,
+    InputGroup,
+    InputRightElement,
     NumberDecrementStepper,
     NumberIncrementStepper,
     NumberInput,
     NumberInputField,
     NumberInputStepper,
     Text,
+    Textarea,
 } from "@chakra-ui/react"
 import { useFormik } from "formik"
 
@@ -41,6 +44,7 @@ export default function VPNForm<T extends VpnCreate>({
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const [ovpnFilename, setOvpnFilename] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
 
     const formik = useFormik({
         initialValues: data,
@@ -67,7 +71,7 @@ export default function VPNForm<T extends VpnCreate>({
                             <FormLabel>备注</FormLabel>
                             <Input
                                 placeholder="备注"
-                                value={formik.values.mark}
+                                defaultValue={formik.values.mark}
                                 onChange={(e) => {
                                     updateData((draft) => {
                                         draft.mark = e.target.value
@@ -84,7 +88,7 @@ export default function VPNForm<T extends VpnCreate>({
                             <FormLabel>用户名</FormLabel>
                             <Input
                                 placeholder="用户名"
-                                value={formik.values.username}
+                                defaultValue={formik.values.username}
                                 onChange={(e) => {
                                     updateData((draft) => {
                                         draft.username = e.target.value
@@ -100,22 +104,36 @@ export default function VPNForm<T extends VpnCreate>({
                         </FormControl>
                         <FormControl isRequired mt="1rem">
                             <FormLabel>密码</FormLabel>
-                            <Input
-                                type="password"
-                                placeholder="密码"
-                                value={formik.values.password}
-                                onChange={(e) => {
-                                    updateData((draft) => {
-                                        draft.password = e.target.value
-                                    })
-                                }}
-                            />
-                            {formik.touched.password &&
-                                formik.errors.password && (
-                                    <FormErrorMessage>
-                                        {formik.errors.password as string}
-                                    </FormErrorMessage>
-                                )}
+                            <InputGroup size="md">
+                                <Input
+                                    pr="4.5rem"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="密码"
+                                    defaultValue={formik.values.password}
+                                    onChange={(e) => {
+                                        updateData((draft) => {
+                                            draft.password = e.target.value
+                                        })
+                                    }}
+                                />
+                                <InputRightElement width="4.5rem">
+                                    <Button
+                                        h="1.75rem"
+                                        size="sm"
+                                        onClick={() =>
+                                            setShowPassword(!showPassword)
+                                        }
+                                    >
+                                        {showPassword ? "Hide" : "Show"}
+                                    </Button>
+                                </InputRightElement>
+                                {formik.touched.password &&
+                                    formik.errors.password && (
+                                        <FormErrorMessage>
+                                            {formik.errors.password as string}
+                                        </FormErrorMessage>
+                                    )}
+                            </InputGroup>
                         </FormControl>
                         <FormControl mt="1rem">
                             <FormLabel>.ovpn文件</FormLabel>
@@ -147,7 +165,7 @@ export default function VPNForm<T extends VpnCreate>({
                                         file.text().then((r) => {
                                             const filename: string =
                                                 "path" in file
-                                                    ? file.path as string
+                                                    ? (file.path as string)
                                                     : file.name
                                             setOvpnFilename(filename)
                                             updateData((draft) => {
@@ -157,12 +175,25 @@ export default function VPNForm<T extends VpnCreate>({
                                     }
                                 }}
                             />
+                            <Textarea
+                                placeholder="OpenVPN配置"
+                                size="md"
+                                mt="1rem"
+                                resize="vertical"
+                                defaultValue={formik.values.ovpn}
+                                rows={8}
+                                onChange={(e) => {
+                                    updateData((draft) => {
+                                        draft.ovpn = e.target.value
+                                    })
+                                }}
+                            />
                         </FormControl>
                         <FormControl mt="1rem">
                             <FormLabel>OTP Secret</FormLabel>
                             <Input
-                                placeholder="密码"
-                                value={formik.values.otp_config.secret}
+                                placeholder="OTP Secret"
+                                defaultValue={formik.values.otp_config.secret}
                                 onChange={(e) => {
                                     updateData((draft) => {
                                         draft.otp_config.secret = e.target.value
@@ -174,7 +205,7 @@ export default function VPNForm<T extends VpnCreate>({
                             <FormLabel>OTP Step</FormLabel>
                             <NumberInput
                                 min={0}
-                                value={formik.values.otp_config.step}
+                                defaultValue={formik.values.otp_config.step}
                                 onChange={(value) => {
                                     updateData((draft) => {
                                         draft.otp_config.step = Number(value)
@@ -187,6 +218,30 @@ export default function VPNForm<T extends VpnCreate>({
                                     <NumberDecrementStepper />
                                 </NumberInputStepper>
                             </NumberInput>
+                        </FormControl>
+                        <FormControl mt="1rem">
+                            <FormLabel>OpenVPN执行文件</FormLabel>
+                            <Input
+                                placeholder="留空使用自带的openvpn"
+                                defaultValue={formik.values.config.executable}
+                                onChange={(e) => {
+                                    updateData((draft) => {
+                                        draft.config.executable = e.target.value
+                                    })
+                                }}
+                            />
+                        </FormControl>
+                        <FormControl mt="1rem">
+                            <FormLabel>网卡</FormLabel>
+                            <Input
+                                placeholder="留空使用默认"
+                                defaultValue={formik.values.config.adapter}
+                                onChange={(e) => {
+                                    updateData((draft) => {
+                                        draft.config.adapter = e.target.value
+                                    })
+                                }}
+                            />
                         </FormControl>
                         <ButtonGroup mt="1rem">
                             <Button colorScheme="teal" type="submit">

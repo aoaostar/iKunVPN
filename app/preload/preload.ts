@@ -19,31 +19,31 @@ const db = {
         },
     },
 }
-const connect = {
-    start(id: number) {
-        return ipcRenderer.invoke("connect/start", id)
+const connections = {
+    connect(id: string) {
+        return ipcRenderer.invoke("connections/connect", id)
     },
-    stop() {
-        return ipcRenderer.invoke("connect/stop")
+    disconnect(id: string) {
+        return ipcRenderer.invoke("connections/disconnect", id)
     },
-    status() {
-        return ipcRenderer.invoke("connect/status")
+    status(id: string) {
+        return ipcRenderer.invoke("connections/status", id)
     },
-    logs() {
-        return ipcRenderer.invoke("connect/logs")
+    logs(id: string) {
+        return ipcRenderer.invoke("connections/logs", id)
     },
 }
 contextBridge.exposeInMainWorld("electronAPI", {
     db: db,
-    connect: connect,
+    connections: connections,
     receive(channel: string, func: any) {
-        let validChannels = ["client/connect/status"]
+        let validChannels = ["client/connections/status"]
         if (validChannels.includes(channel)) {
             ipcRenderer.on(channel, (_, ...args) => func(...args))
         }
     },
     removeAllListeners(channel: string) {
-        let validChannels = ["client/connect/status"]
+        const validChannels = ["client/connections/status"]
         if (validChannels.includes(channel)) {
             ipcRenderer.removeAllListeners(channel)
         }
