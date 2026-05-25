@@ -1,5 +1,11 @@
 import { VPNDetail } from "@/api/vpn.ts"
 
+export type Adapter = {
+    name: string
+    id: string
+    type: string
+}
+
 export enum Status {
     Success = "Success",
     Error = "Error",
@@ -29,6 +35,12 @@ export const Connections = {
     },
     logs: async (id: string): Promise<string[]> => {
         return await window.electronAPI.connections.logs(id)
+    },
+    installTap: async (): Promise<string> => {
+        return await window.electronAPI.connections.installTap()
+    },
+    showAdapters: async (): Promise<Adapter[]> => {
+        return await window.electronAPI.connections.showAdapters()
     },
     receive: async (func: (data: StatusNotification) => void) => {
         return await window.electronAPI.receive("client/connections/status", func)

@@ -12,10 +12,13 @@ export function bytesToSize(bytes: number) {
 
 export function executeCommand(
     command: string,
-    options:ExecOptions = {}
+    options: ExecOptions = {}
 ): Promise<string> {
+    console.log(`Executing command: ${command}`)
     return new Promise((resolve, reject) => {
         exec(command, options, (error, stdout, stderr) => {
+            console.log(stdout)
+            console.log(stderr)
             if (error) {
                 reject(error.toString())
             }

@@ -40,4 +40,7 @@ export default function initIpcMain() {
     ipcMain.handle("connections/showAdapters", async (_) => {
         return await Connections.showAdapters()
     })
+    ipcMain.handle("connections/installTap", async (_) => {
+        return await Connections.installTap()
+    })
 }

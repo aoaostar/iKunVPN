@@ -1,5 +1,6 @@
 import { VPNDetail } from "@/components/VPNList.tsx"
 import { VpnCreate, VpnUpdate } from "@/api/vpn.ts"
+import { Adapter } from "@/api/connections.ts"
 
 export interface IDb {
     vpn: IVpn
@@ -10,6 +11,8 @@ export interface IConnections {
     disconnect: (id: string) => Promise
     status: (id: string) => Promise<Status>
     logs: (id: string) => Promise<string[]>
+    installTap: () => Promise<string>
+    showAdapters: () => Promise<Adapter[]>
 }
 
 export interface IVpn {

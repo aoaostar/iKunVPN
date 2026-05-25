@@ -32,6 +32,12 @@ const connections = {
     logs(id: string) {
         return ipcRenderer.invoke("connections/logs", id)
     },
+    showAdapters() {
+        return ipcRenderer.invoke("connections/showAdapters")
+    },
+    installTap() {
+        return ipcRenderer.invoke("connections/installTap")
+    },
 }
 contextBridge.exposeInMainWorld("electronAPI", {
     db: db,

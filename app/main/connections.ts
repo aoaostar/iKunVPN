@@ -85,8 +85,16 @@ export default class Connections {
     }
 
     static async installTap() {
+        await executeCommand(`tapinstall.exe remove tap0901`, {
+            cwd: this.cwd,
+        }).catch(() => {
+            /* ignore */
+        })
         return await executeCommand(
-            `tapinstall.exe install "tap0901.inf" tap0901`
+            `tapinstall.exe install "tap0901.inf" tap0901`,
+            {
+                cwd: this.cwd,
+            }
         )
     }
 
@@ -97,14 +105,10 @@ export default class Connections {
     }
 
     static async deleteAdapter(guid_or_name: string) {
-        return await executeCommand(
-            `tapctl.exe delete "${guid_or_name}"`
-        )
+        return await executeCommand(`tapctl.exe delete "${guid_or_name}"`)
     }
     static async deleteAllAdapter(hwid: string) {
-        return await executeCommand(
-            `tapinstall.exe remove ${hwid}"`
-        )
+        return await executeCommand(`tapinstall.exe remove ${hwid}"`)
     }
 }
 
