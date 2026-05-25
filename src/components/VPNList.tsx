@@ -13,10 +13,11 @@ import VpnListItem from "@/components/VpnListItem.tsx"
 type VPNListProps = {
     data: VPNDetail[]
     handleDelete: (vpnDetail: VPNDetail) => void
+    autoReconnect: boolean
 }
 
 export default function VPNList(props: VPNListProps & BoxProps) {
-    const { data, handleDelete,...restProps } = props
+    const { data, handleDelete, autoReconnect, ...restProps } = props
 
     return (
         <Box {...restProps}>
@@ -28,7 +29,7 @@ export default function VPNList(props: VPNListProps & BoxProps) {
                 <CardBody>
                     <Stack divider={<StackDivider />} spacing="4">
                         {data.map((value) => {
-                            return <VpnListItem vpnDetail={value} handleDelete={handleDelete} key={value.id}></VpnListItem>
+                            return <VpnListItem vpnDetail={value} handleDelete={handleDelete} autoReconnect={autoReconnect} key={value.id}></VpnListItem>
                         })}
                     </Stack>
                 </CardBody>

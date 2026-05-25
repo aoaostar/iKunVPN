@@ -25,11 +25,13 @@ import Console from "@/components/Console.tsx"
 type Props = BoxProps & {
     vpnDetail: VPNDetail
     handleDelete: (vpnDetail: VPNDetail) => void
+    autoReconnect: boolean
 }
 
 export default function VpnListItem({
     vpnDetail,
     handleDelete: ParentHandleDelete,
+    autoReconnect,
 }: Props) {
     const [status, setStatus] = useState(Status.Stop)
     const [serverIp, setServerIp] = useState("")
@@ -43,7 +45,7 @@ export default function VpnListItem({
             return
         }
         setStatus(Status.Connecting)
-        const toastId = Toast.loading("正在连接")
+        // const toastId = Toast.loading("正在连接")
 
         try {
             const r = await Connections.connect(vpnDetail.id)
@@ -52,7 +54,7 @@ export default function VpnListItem({
         } catch (e: any) {
             Toast.error("连接失败", e.message)
         } finally {
-            Toast.close(toastId)
+            // Toast.close(toastId)
         }
     }, [])
 
@@ -112,14 +114,14 @@ export default function VpnListItem({
 
     useEffect(() => {
         const interval = setInterval(async () => {
-            if (status === Status.Error) {
+            if (autoReconnect && status === Status.Error) {
                 await handleConnect()
             }
         }, 5 * 1000)
         return () => {
             clearInterval(interval)
         }
-    }, [status])
+    }, [status, autoReconnect])
 
     return (
         <Flex justify={"space-between"} key={vpnDetail.id}>

@@ -1,10 +1,10 @@
 import {
     Button,
-    ButtonGroup,
     Card,
     CardBody,
+    Checkbox,
     Flex,
-    Heading,
+    Heading, HStack,
     Text,
 } from "@chakra-ui/react"
 import { useCallback, useEffect, useState } from "react"
@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom"
 
 export default function Home() {
     const [vpnData, setVpnData] = useState<VPNDetail[]>([])
+    const [autoReconnect, setAutoReconnect] = useState(false)
 
     const navigate = useNavigate()
 
@@ -36,7 +37,15 @@ export default function Home() {
                 <CardBody>
                     <Flex justify="space-between">
                         <Heading size="md">iKunVPN</Heading>
-                        <ButtonGroup>
+                        <HStack spacing="1rem">
+                            <Checkbox
+                                isChecked={autoReconnect}
+                                onChange={(e) =>
+                                    setAutoReconnect(e.target.checked)
+                                }
+                            >
+                                <Text fontSize="xs">自动重连</Text>
+                            </Checkbox>
                             <Button
                                 onClick={() => {
                                     navigate("/create")
@@ -44,7 +53,7 @@ export default function Home() {
                             >
                                 <Text fontSize="xs">新增</Text>
                             </Button>
-                        </ButtonGroup>
+                        </HStack>
                     </Flex>
                 </CardBody>
             </Card>
@@ -52,6 +61,7 @@ export default function Home() {
                 mt=".5rem"
                 data={vpnData}
                 handleDelete={handleDelete}
+                autoReconnect={autoReconnect}
             ></VPNList>
         </>
     )
