@@ -38,6 +38,15 @@ const connections = {
     installTap() {
         return ipcRenderer.invoke("connections/installTap")
     },
+    listTaps() {
+        return ipcRenderer.invoke("connections/listTaps")
+    },
+    createTap(name: string) {
+        return ipcRenderer.invoke("connections/createTap", name)
+    },
+    deleteTap(guidOrName: string) {
+        return ipcRenderer.invoke("connections/deleteTap", guidOrName)
+    },
 }
 contextBridge.exposeInMainWorld("electronAPI", {
     db: db,

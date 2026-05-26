@@ -43,4 +43,13 @@ export default function initIpcMain() {
     ipcMain.handle("connections/installTap", async (_) => {
         return await Connections.installTap()
     })
+    ipcMain.handle("connections/listTaps", async (_) => {
+        return await Connections.listTaps()
+    })
+    ipcMain.handle("connections/createTap", async (_, name: string) => {
+        return await Connections.createTap(name)
+    })
+    ipcMain.handle("connections/deleteTap", async (_, guidOrName: string) => {
+        return await Connections.deleteTap(guidOrName)
+    })
 }

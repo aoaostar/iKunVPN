@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Updater } from "use-immer"
 import { VpnCreate } from "@/api/vpn.ts"
 import {
@@ -23,8 +23,12 @@ import {
     NumberInputStepper,
     Text,
     Textarea,
+    Select,
 } from "@chakra-ui/react"
 import { useFormik } from "formik"
+import Connections from "@/api/connections.ts"
+import type { Adapter } from "@/types/adapter"
+import Toast from "@/utils/toast.ts"
 
 type Props<T extends VpnCreate> = {
     title: string
@@ -45,6 +49,20 @@ export default function VPNForm<T extends VpnCreate>({
 
     const [ovpnFilename, setOvpnFilename] = useState("")
     const [showPassword, setShowPassword] = useState(false)
+    const [tapList, setTapList] = useState<Adapter[]>([])
+
+    const loadTapList = useCallback(async () => {
+        try {
+            const list = await Connections.listTaps()
+            setTapList(list)
+        } catch (e: any) {
+            Toast.error("获取网卡列表失败", e.message || e)
+        }
+    }, [])
+
+    useEffect(() => {
+        loadTapList()
+    }, [loadTapList])
 
     const formik = useFormik({
         initialValues: data,
@@ -233,15 +251,21 @@ export default function VPNForm<T extends VpnCreate>({
                         </FormControl>
                         <FormControl mt="1rem">
                             <FormLabel>网卡</FormLabel>
-                            <Input
+                            <Select
                                 placeholder="留空使用默认"
-                                defaultValue={formik.values.config.adapter}
+                                value={formik.values.config.adapter}
                                 onChange={(e) => {
                                     updateData((draft) => {
                                         draft.config.adapter = e.target.value
                                     })
                                 }}
-                            />
+                            >
+                                {tapList.map((tap) => (
+                                    <option key={tap.guid} value={tap.name}>
+                                        {tap.name}
+                                    </option>
+                                ))}
+                            </Select>
                         </FormControl>
                         <ButtonGroup mt="1rem">
                             <Button colorScheme="teal" type="submit">

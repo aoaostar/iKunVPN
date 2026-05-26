@@ -1,6 +1,6 @@
-import { VPNDetail } from "@/components/VPNList.tsx"
-import { VpnCreate, VpnUpdate } from "@/api/vpn.ts"
-import { Adapter } from "@/api/connections.ts"
+import type { VPNDetail } from "@/components/VPNList.tsx"
+import type { VpnCreate, VpnUpdate } from "@/api/vpn.ts"
+import type { Adapter } from "@/types/adapter"
 
 export interface IDb {
     vpn: IVpn
@@ -12,6 +12,9 @@ export interface IConnections {
     status: (id: string) => Promise<Status>
     logs: (id: string) => Promise<string[]>
     installTap: () => Promise<string>
+    listTaps: () => Promise<Adapter[]>
+    createTap: (name: string) => Promise<Adapter>
+    deleteTap: (guidOrName: string) => Promise<void>
     showAdapters: () => Promise<Adapter[]>
 }
 

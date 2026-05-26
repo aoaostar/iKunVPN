@@ -9,6 +9,7 @@ export type Adapter = {
     name: string
     id: string
     type: string
+    guid?: string
 }
 
 export default class Connections {
@@ -84,6 +85,49 @@ export default class Connections {
         return adapters
     }
 
+    static async listTaps(): Promise<Adapter[]> {
+        const stdout = await executeCommand(`tapctl.exe list`, {
+            cwd: this.cwd,
+        })
+        log.debug(`listTaps: ${stdout}`)
+
+        const lines = stdout.split("\n").filter((l) => l.trim())
+        const taps: Adapter[] = []
+        for (const line of lines) {
+            if (line.startsWith("GUID")) continue
+            const match = line.match(/({[0-9A-Za-z-]+})\s+(.+)/)
+            log.debug(`line: ${line}, match: ${match}`)
+            if (match) {
+                taps.push({
+                    guid: match[1],
+                    name: match[2],
+                    id: match[3],
+                    type: "tap",
+                })
+            }
+        }
+        return taps
+    }
+
+    static async createTap(name: string): Promise<Adapter> {
+        await executeCommand(
+            `tapctl.exe create --name "${name}" --hwid tap0901`,
+            { cwd: this.cwd }
+        )
+        const taps = await this.listTaps()
+        const tap = taps.find((t) => t.name === name)
+        if (!tap) {
+            throw new Error("TAP adapter created but not found")
+        }
+        return tap
+    }
+
+    static async deleteTap(guidOrName: string): Promise<void> {
+        await executeCommand(`tapctl.exe delete "${guidOrName}"`, {
+            cwd: this.cwd,
+        })
+    }
+
     static async installTap() {
         await executeCommand(`tapinstall.exe remove tap0901`, {
             cwd: this.cwd,
@@ -92,26 +136,7 @@ export default class Connections {
         })
         return await executeCommand(
             `tapinstall.exe install "tap0901.inf" tap0901`,
-            {
-                cwd: this.cwd,
-            }
+            { cwd: this.cwd }
         )
-    }
-
-    static async createAdapter(name: string, hwid: string = "tap0901") {
-        return await executeCommand(
-            `tapctl.exe create --name "${name}" --hwid ${hwid}`
-        )
-    }
-
-    static async deleteAdapter(guid_or_name: string) {
-        return await executeCommand(`tapctl.exe delete "${guid_or_name}"`)
-    }
-    static async deleteAllAdapter(hwid: string) {
-        return await executeCommand(`tapinstall.exe remove ${hwid}"`)
     }
 }
-
-Connections.showAdapters().then((r) => {
-    console.log(r)
-})
