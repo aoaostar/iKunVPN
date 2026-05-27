@@ -1,14 +1,12 @@
-import { ChakraProvider, Container } from "@chakra-ui/react"
+import { ConfigProvider } from '@douyinfe/semi-ui';
 import { RouterProvider } from "react-router-dom"
 import { globalRouters } from "./router"
 
 function App() {
     return (
-        <ChakraProvider>
-            <Container maxW="container.xl">
-                <RouterProvider router={globalRouters}></RouterProvider>
-            </Container>
-        </ChakraProvider>
+        <ConfigProvider>
+            <RouterProvider router={globalRouters}></RouterProvider>
+        </ConfigProvider>
     )
 }
 

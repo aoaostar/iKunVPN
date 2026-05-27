@@ -1,43 +1,26 @@
 import {
-    Badge,
-    Box,
     Button,
-    ButtonGroup,
     Card,
-    CardBody,
-    CardHeader,
     Checkbox,
-    Flex,
-    Heading,
     Input,
+    Layout,
     Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalOverlay,
+    Space,
     Table,
-    Tbody,
-    Td,
-    Th,
-    Thead,
-    Tr,
-    Text,
     Tabs,
-    TabList,
-    TabPanels,
-    Tab,
-    TabPanel,
-} from "@chakra-ui/react"
+    Tag,
+    Typography,
+} from "@douyinfe/semi-ui"
 import { useCallback, useEffect, useState } from "react"
 import { Vpn, VPNDetail } from "@/api/vpn.ts"
-import VPNList from "@/components/VPNList.tsx"
+import HomeVpnTable from "@/components/HomeVpnTable.tsx"
 import { useNavigate } from "react-router-dom"
 import Connections from "@/api/connections.ts"
-import type { Adapter } from "@/types/adapter"
+import type { Adapter } from "@/types/adapter.ts"
 import Toast from "@/utils/toast.ts"
-import { executeCommand } from "../../app/main/utils.ts"
+
+const { Content } = Layout
+const { Text } = Typography
 
 export default function Home() {
     const [vpnData, setVpnData] = useState<VPNDetail[]>([])
@@ -86,23 +69,26 @@ export default function Home() {
             loadTapList()
         } catch (e: any) {
             Toast.error("网卡创建失败", e.message || e)
-        }finally {
+        } finally {
             Toast.close(toastId)
         }
     }, [newTapName, loadTapList])
 
-    const handleDeleteTap = useCallback(async (guid: string) => {
-        const toastId = Toast.loading("正在删除虚拟网卡...")
-        try {
-            await Connections.deleteTap(guid)
-            Toast.success("网卡已删除")
-            loadTapList()
-        } catch (e: any) {
-            Toast.error("网卡删除失败", e.message || e)
-        }finally {
-            Toast.close(toastId)
-        }
-    }, [loadTapList])
+    const handleDeleteTap = useCallback(
+        async (guid: string) => {
+            const toastId = Toast.loading("正在删除虚拟网卡...")
+            try {
+                await Connections.deleteTap(guid)
+                Toast.success("网卡已删除")
+                loadTapList()
+            } catch (e: any) {
+                Toast.error("网卡删除失败", e.message || e)
+            } finally {
+                Toast.close(toastId)
+            }
+        },
+        [loadTapList]
+    )
 
     const handleRefreshTapList = useCallback(async () => {
         setRefreshing(true)
@@ -133,164 +119,158 @@ export default function Home() {
         [vpnData]
     )
 
-        return (
-            <>
-                <Card mt=".5rem">
-                    <CardBody>
-                        <Flex justify="space-between">
-                            <Heading size="md">iKunVPN</Heading>
-                            <ButtonGroup>
-                                <Checkbox
-                                    isChecked={autoReconnect}
-                                    onChange={(e) =>
-                                        setAutoReconnect(e.target.checked)
-                                    }
-                                >
-                                    <Text fontSize="xs">自动重连</Text>
-                                </Checkbox>
+    const tapColumns = [
+        {
+            title: "名称",
+            dataIndex: "name",
+            key: "name",
+            render: (name: string) => <Tag color="teal">{name}</Tag>,
+        },
+        {
+            title: "GUID",
+            dataIndex: "guid",
+            key: "guid",
+            render: (guid: string) => (
+                <Text style={{ fontSize: 12, color: "#999" }}>{guid}</Text>
+            ),
+        },
+        {
+            title: "操作",
+            key: "action",
+            render: (_: any, record: Adapter) => (
+                <Button
+                    type="secondary"
+                    size="small"
+                    danger
+                    onClick={() => handleDeleteTap(record.guid!)}
+                >
+                    删除
+                </Button>
+            ),
+        },
+    ]
+
+    return (
+        <Layout>
+            {/* 顶部导航栏 */}
+            <Layout.Header
+                style={{
+                    background: "#fff",
+                    padding: "12px 24px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    borderBottom: "1px solid #ebe0eb",
+                    marginBottom: 0,
+                }}
+            >
+                <Typography.Title heading={4} style={{ margin: 0 }}>
+                    iKunVPN
+                </Typography.Title>
+            </Layout.Header>
+
+            {/* 主内容区 */}
+            <Content style={{ padding: 24, background: "#fff" }}>
+                <Card style={{ marginBottom: 16 }}>
+                    <Tabs defaultActiveKey="0" type="card">
+                        <Tabs.TabPane tab="虚拟网卡" itemKey="0">
+                            <Space
+                                style={{
+                                    margin: "1rem 0",
+                                }}
+                            >
                                 <Button
+                                    loading={installingTap}
+                                    size="small"
                                     onClick={handleInstallTap}
-                                    isLoading={installingTap}
+                                    theme="outline"
                                 >
-                                    <Text fontSize="xs">安装TAP</Text>
+                                    安装TAP
                                 </Button>
                                 <Button
-                                    onClick={() => {
-                                        navigate("/create")
+                                    size="small"
+                                    loading={refreshing}
+                                    onClick={handleRefreshTapList}
+                                    theme="outline"
+                                >
+                                    刷新
+                                </Button>
+                                <Button
+                                    size="small"
+                                    onClick={() => setShowTapModal(true)}
+                                >
+                                    新建网卡
+                                </Button>
+                            </Space>
+                            {tapList.length === 0 ? (
+                                <Typography.Text
+                                    type="tertiary"
+                                    style={{
+                                        display: "block",
+                                        textAlign: "center",
+                                        padding: "40px 0",
                                     }}
                                 >
-                                    <Text fontSize="xs">新增</Text>
+                                    暂无网卡，请先安装TAP驱动
+                                </Typography.Text>
+                            ) : (
+                                <Table
+                                    columns={tapColumns}
+                                    dataSource={tapList}
+                                    rowKey="guid"
+                                    bordered
+                                />
+                            )}
+                        </Tabs.TabPane>
+                        <Tabs.TabPane
+                            tab="服务器列表"
+                            itemKey="1"
+                        >
+                            <Space
+                                style={{
+                                    margin: "1rem 0",
+                                }}
+                            >
+                                <Checkbox
+                                    checked={autoReconnect}
+                                    onChange={() =>
+                                        setAutoReconnect(!autoReconnect)
+                                    }
+                                >
+                                    自动重连
+                                </Checkbox>
+                                <Button
+                                    type="primary"
+                                    size="small"
+                                    onClick={() => navigate("/create")}
+                                >
+                                    + 新增
                                 </Button>
-                            </ButtonGroup>
-                        </Flex>
-                    </CardBody>
-                </Card>
-
-                <Card mt=".5rem">
-                    <Tabs>
-                        <TabList>
-                            <Tab>虚拟网卡</Tab>
-                            <Tab>服务器列表</Tab>
-                        </TabList>
-
-                        <TabPanels>
-                            <TabPanel>
-                                <Flex justify="space-between" mb={2}>
-                                    <Box>虚拟网卡</Box>
-                                    <ButtonGroup size="xs">
-                                        <Button
-                                            size="xs"
-                                            onClick={handleRefreshTapList}
-                                            isLoading={refreshing}
-                                        >
-                                            刷新
-                                        </Button>
-                                        <Button
-                                            size="xs"
-                                            onClick={() =>
-                                                setShowTapModal(true)
-                                            }
-                                        >
-                                            新建
-                                        </Button>
-                                    </ButtonGroup>
-                                </Flex>
-                                {tapList.length === 0 ? (
-                                    <Text color="gray.500">
-                                        暂无网卡，请先安装TAP驱动
-                                    </Text>
-                                ) : (
-                                    <Table size="sm">
-                                        <Thead>
-                                            <Tr>
-                                                <Th>名称</Th>
-                                                <Th>GUID</Th>
-                                                <Th>操作</Th>
-                                            </Tr>
-                                        </Thead>
-                                        <Tbody>
-                                            {tapList.map((tap) => (
-                                                <Tr key={tap.guid}>
-                                                    <Td>
-                                                        <Badge colorScheme="teal">
-                                                            {tap.name}
-                                                        </Badge>
-                                                    </Td>
-                                                    <Td
-                                                        fontSize="xs"
-                                                        color="gray.500"
-                                                    >
-                                                        {tap.guid}
-                                                    </Td>
-                                                    <Td>
-                                                        <Button
-                                                            size="xs"
-                                                            colorScheme="red"
-                                                            variant="ghost"
-                                                            onClick={() =>
-                                                                handleDeleteTap(
-                                                                    tap.guid!
-                                                                )
-                                                            }
-                                                        >
-                                                            删除
-                                                        </Button>
-                                                    </Td>
-                                                </Tr>
-                                            ))}
-                                        </Tbody>
-                                    </Table>
-                                )}
-                            </TabPanel>
-
-                            <TabPanel p={0}>
-                                <VPNList
-                                    data={vpnData}
-                                    handleDelete={handleDelete}
-                                    autoReconnect={autoReconnect}
-                                ></VPNList>
-                            </TabPanel>
-                        </TabPanels>
+                            </Space>
+                            <HomeVpnTable
+                                data={vpnData}
+                                onDelete={handleDelete}
+                                autoReconnect={autoReconnect}
+                            />
+                        </Tabs.TabPane>
                     </Tabs>
                 </Card>
+            </Content>
 
-                <Modal
-                    isOpen={showTapModal}
-                    onClose={() => setShowTapModal(false)}
-                >
-                    <ModalOverlay />
-                    <ModalContent>
-                        <ModalHeader>创建虚拟网卡</ModalHeader>
-                        <ModalCloseButton />
-                        <ModalBody>
-                            <Input
-                                placeholder="网卡名称（英文）"
-                                value={newTapName}
-                                onChange={(e) => setNewTapName(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        handleCreateTap()
-                                    }
-                                }}
-                            />
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button
-                                colorScheme="teal"
-                                onClick={handleCreateTap}
-                                mr={3}
-                            >
-                                创建
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                onClick={() => setShowTapModal(false)}
-                            >
-                                取消
-                            </Button>
-                        </ModalFooter>
-                    </ModalContent>
-                </Modal>
-            </>
-        )
+            <Modal
+                visible={showTapModal}
+                onClose={() => setShowTapModal(false)}
+                onOk={handleCreateTap}
+                title="创建虚拟网卡"
+                okText="创建"
+                cancelText="取消"
+            >
+                <Input
+                    placeholder="网卡名称（英文）"
+                    value={newTapName}
+                    onChange={(val) => setNewTapName(val)}
+                />
+            </Modal>
+        </Layout>
+    )
 }

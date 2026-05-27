@@ -7,7 +7,7 @@ const request = axios.create({
 })
 
 request.interceptors.response.use(
-    function (response) {
+    function (response: any) {
         let data = response.data
 
         if (data.status !== "ok") {
@@ -15,7 +15,7 @@ request.interceptors.response.use(
         }
         return data.data
     },
-    function (error) {
+    function (error: any) {
         Toast.error("失败", error.message)
         return Promise.reject(error)
     }

@@ -1,20 +1,10 @@
 import {
-    Box,
-    BoxProps,
-    Button,
-    ButtonGroup,
-    CircularProgress,
-    Flex,
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalHeader,
-    ModalOverlay,
     Tag,
-    Text,
-    useDisclosure,
-} from "@chakra-ui/react"
+    Button,
+    Space,
+    Spin,
+    Modal,
+} from '@douyinfe/semi-ui';
 import { Vpn, VPNDetail } from "@/api/vpn.ts"
 import { useCallback, useEffect, useState } from "react"
 import Connections, { Status, StatusNotification } from "@/api/connections.ts"
@@ -22,30 +12,26 @@ import Toast from "@/utils/toast.ts"
 import { useNavigate } from "react-router-dom"
 import Console from "@/components/Console.tsx"
 
-type Props = BoxProps & {
-    vpnDetail: VPNDetail
-    handleDelete: (vpnDetail: VPNDetail) => void
-    autoReconnect: boolean
-}
-
 export default function VpnListItem({
     vpnDetail,
     handleDelete: ParentHandleDelete,
     autoReconnect,
-}: Props) {
+}: {
+    vpnDetail: VPNDetail
+    handleDelete: (vpnDetail: VPNDetail) => void
+    autoReconnect: boolean
+}) {
     const [status, setStatus] = useState(Status.Stop)
     const [serverIp, setServerIp] = useState("")
 
     const navigate = useNavigate()
-
-    const { isOpen, onOpen, onClose } = useDisclosure()
+    const [modalVisible, setModalVisible] = useState(false)
 
     const handleConnect = useCallback(async () => {
         if (status === Status.Connecting) {
             return
         }
         setStatus(Status.Connecting)
-        // const toastId = Toast.loading("正在连接")
 
         try {
             const r = await Connections.connect(vpnDetail.id)
@@ -53,10 +39,8 @@ export default function VpnListItem({
             Toast.success("连接成功")
         } catch (e: any) {
             Toast.error("连接失败", e.message)
-        } finally {
-            // Toast.close(toastId)
         }
-    }, [])
+    }, [status, vpnDetail.id])
 
     const handleDisConnect = useCallback(async () => {
         try {
@@ -66,18 +50,18 @@ export default function VpnListItem({
         } catch (e: any) {
             Toast.error("操作失败", e.message)
         }
-    }, [])
+    }, [vpnDetail.id])
 
     const handleDelete = useCallback(() => {
         Vpn.delete(vpnDetail.id)
-            .then((_: any) => {
+            .then((_ : any) => {
                 ParentHandleDelete(vpnDetail)
                 Toast.success("删除成功", "")
             })
             .catch((e: any) => {
                 Toast.error("删除失败", e.message)
             })
-    }, [])
+    }, [vpnDetail.id, ParentHandleDelete])
 
     useEffect(() => {
         const func = (r: StatusNotification) => {
@@ -96,7 +80,7 @@ export default function VpnListItem({
         return () => {
             Connections.removeAllListeners().then()
         }
-    }, [])
+    }, [vpnDetail.id])
 
     useEffect(() => {
         const regExp = new RegExp(/remote (\b(?:\d{1,3}\.){3}\d{1,3}\b) /g)
@@ -104,13 +88,13 @@ export default function VpnListItem({
         if (regExpExecArray && regExpExecArray.length > 1) {
             setServerIp(regExpExecArray[1])
         }
-    }, [])
+    }, [vpnDetail.ovpn])
 
     useEffect(() => {
         Connections.status(vpnDetail.id).then((r: Status) => {
             setStatus(r)
         })
-    }, [])
+    }, [vpnDetail.id])
 
     useEffect(() => {
         const interval = setInterval(async () => {
@@ -121,99 +105,98 @@ export default function VpnListItem({
         return () => {
             clearInterval(interval)
         }
-    }, [status, autoReconnect])
+    }, [status, autoReconnect, handleConnect])
+
+    const getStatusTag = () => {
+        switch (status) {
+            case Status.Success:
+                return <Tag color="green">已连接</Tag>
+            case Status.Connecting:
+                return <Tag color="blue">连接中</Tag>
+            default:
+                return <Tag>未连接</Tag>
+        }
+    }
 
     return (
-        <Flex justify={"space-between"} key={vpnDetail.id}>
-            <Box>
-                <Tag variant="solid" colorScheme="teal">
-                    {vpnDetail.mark}
-                </Tag>
-                <Tag>{vpnDetail.username}</Tag>
-                {serverIp && (
-                    <Tag
-                        variant="solid"
-                        colorScheme="teal"
-                        ml="0.8rem"
-                        mr="0.8rem"
-                    >
-                        {serverIp}
-                    </Tag>
-                )}
+        <>
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 0',
+                borderBottom: '1px solid #f0f0f0',
+            }}>
+                {/* 左侧：信息区 */}
+                <Space size="medium">
+                    <Tag color="teal" style={{ fontSize: 13 }}>{vpnDetail.mark}</Tag>
+                    <span style={{ color: '#666' }}>{vpnDetail.username}</span>
+                    {serverIp && (
+                        <Tag color="teal" style={{ fontSize: 12 }}>{serverIp}</Tag>
+                    )}
+                    {status === Status.Connecting && (
+                        <Spin size="small" />
+                    )}
+                </Space>
 
-                {[Status.Error, Status.Stop].includes(status) && <></>}
-                {status == Status.Connecting && (
-                    <>
-                        <CircularProgress
-                            isIndeterminate
-                            color="teal.400"
-                            size="2rem"
-                        />
-                    </>
-                )}
-            </Box>
-            <ButtonGroup>
-                <Flex alignItems="center" gap=".5rem">
-                    {status == Status.Success && (
-                        <>
-                            <Tag variant="solid" colorScheme="teal">
-                                已连接
-                            </Tag>
-                            <Button
-                                onClick={handleDisConnect}
-                                colorScheme="teal"
-                                variant="outline"
-                            >
-                                <Text fontSize="xs">断开</Text>
-                            </Button>
-                        </>
+                {/* 右侧：状态 & 操作区 */}
+                <Space size="small">
+                    {/* 状态标签 */}
+                    <span style={{ minWidth: 60, textAlign: 'center' }}>
+                        {getStatusTag()}
+                    </span>
+
+                    {/* 连接/断开按钮 */}
+                    {status === Status.Success && (
+                        <Button
+                            size="small"
+                            onClick={handleDisConnect}
+                            theme="outline"
+                        >
+                            断开
+                        </Button>
                     )}
                     {[Status.Error, Status.Stop].includes(status) && (
-                        <>
-                            <Tag variant="solid" colorScheme="gray">
-                                未连接
-                            </Tag>
-                            <Button onClick={handleConnect}>
-                                <Text fontSize="xs">连接</Text>
-                            </Button>
-                        </>
+                        <Button
+                            size="small"
+                            type="primary"
+                            onClick={handleConnect}
+                        >
+                            连接
+                        </Button>
                     )}
-                    {status == Status.Connecting && (
-                        <>
-                            <Tag variant="solid" colorScheme="blue">
-                                连接中
-                            </Tag>
-                            <Button
-                                onClick={handleDisConnect}
-                                colorScheme="teal"
-                                variant="outline"
-                            >
-                                <Text fontSize="xs">断开</Text>
-                            </Button>
-                        </>
+                    {status === Status.Connecting && (
+                        <Button
+                            size="small"
+                            theme="outline"
+                            onClick={handleDisConnect}
+                        >
+                            取消
+                        </Button>
                     )}
-                </Flex>
-                <Button onClick={() => navigate(`/detail/${vpnDetail.id}`)}>
-                    <Text fontSize="xs">修改</Text>
-                </Button>
-                <Button onClick={onOpen}>
-                    <Text fontSize="xs">日志</Text>
-                </Button>
-                <Button onClick={handleDelete}>
-                    <Text fontSize="xs">删除</Text>
-                </Button>
-            </ButtonGroup>
 
-            <Modal isOpen={isOpen} onClose={onClose} size="4xl">
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>日志</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        <Console vpnId={vpnDetail.id}></Console>
-                    </ModalBody>
-                </ModalContent>
+                    {/* 工具按钮 */}
+                    <Button size="small" onClick={() => navigate(`/detail/${vpnDetail.id}`)}>
+                        修改
+                    </Button>
+                    <Button size="small" onClick={() => setModalVisible(true)}>
+                        日志
+                    </Button>
+                    <Button size="small" danger onClick={handleDelete}>
+                        删除
+                    </Button>
+                </Space>
+            </div>
+
+            <Modal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+                footer={null}
+                title="日志"
+                size="large"
+            >
+                <Console vpnId={vpnDetail.id}></Console>
             </Modal>
-        </Flex>
+        </>
     )
 }

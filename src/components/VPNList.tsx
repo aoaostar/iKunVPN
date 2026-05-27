@@ -1,12 +1,7 @@
 import {
-    Box,
-    BoxProps,
     Card,
-    CardBody,
-    CardHeader,
-    Stack,
-    StackDivider,
-} from "@chakra-ui/react"
+    List,
+} from '@douyinfe/semi-ui';
 import { VPNDetail } from "@/api/vpn.ts"
 import VpnListItem from "@/components/VpnListItem.tsx"
 
@@ -16,24 +11,19 @@ type VPNListProps = {
     autoReconnect: boolean
 }
 
-export default function VPNList(props: VPNListProps & BoxProps) {
-    const { data, handleDelete, autoReconnect, ...restProps } = props
+export default function VPNList(props: VPNListProps) {
+    const { data, handleDelete, autoReconnect } = props
 
     return (
-        <Box {...restProps}>
-            <Card>
-                <CardHeader>
-                    <Box>服务器列表</Box>
-                </CardHeader>
-
-                <CardBody>
-                    <Stack divider={<StackDivider />} spacing="4">
-                        {data.map((value) => {
-                            return <VpnListItem vpnDetail={value} handleDelete={handleDelete} autoReconnect={autoReconnect} key={value.id}></VpnListItem>
-                        })}
-                    </Stack>
-                </CardBody>
-            </Card>
-        </Box>
+        <Card title="服务器列表" style={{ marginBottom: 16 }}>
+            <List
+                dataSource={data}
+                renderItem={(item: VPNDetail) => (
+                    <List.Item>
+                        <VpnListItem vpnDetail={item} handleDelete={handleDelete} autoReconnect={autoReconnect} />
+                    </List.Item>
+                )}
+            />
+        </Card>
     )
 }

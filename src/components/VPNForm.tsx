@@ -2,32 +2,18 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { Updater } from "use-immer"
 import { VpnCreate } from "@/api/vpn.ts"
 import {
-    Box,
-    Button,
-    ButtonGroup,
     Card,
-    CardBody,
-    CardHeader,
-    Center,
-    Flex,
-    FormControl,
-    FormErrorMessage,
-    FormLabel,
+    Form,
     Input,
-    InputGroup,
-    InputRightElement,
-    NumberDecrementStepper,
-    NumberIncrementStepper,
-    NumberInput,
-    NumberInputField,
-    NumberInputStepper,
-    Text,
-    Textarea,
+    Button,
     Select,
-} from "@chakra-ui/react"
+    Space,
+    InputNumber,
+    TextArea,
+} from '@douyinfe/semi-ui';
 import { useFormik } from "formik"
 import Connections from "@/api/connections.ts"
-import type { Adapter } from "@/types/adapter"
+import type { Adapter } from "@/types/adapter.ts"
 import Toast from "@/utils/toast.ts"
 
 type Props<T extends VpnCreate> = {
@@ -46,9 +32,7 @@ export default function VPNForm<T extends VpnCreate>({
     handleCancel,
 }: Props<T>) {
     const fileInputRef = useRef<HTMLInputElement>(null)
-
     const [ovpnFilename, setOvpnFilename] = useState("")
-    const [showPassword, setShowPassword] = useState(false)
     const [tapList, setTapList] = useState<Adapter[]>([])
 
     const loadTapList = useCallback(async () => {
@@ -64,10 +48,11 @@ export default function VPNForm<T extends VpnCreate>({
         loadTapList()
     }, [loadTapList])
 
+    const FormItem = Form as any
+
     const formik = useFormik({
         initialValues: data,
-
-        onSubmit: (values, _) => {
+        onSubmit: (values: T) => {
             handleSave(values)
         },
     })
@@ -77,205 +62,118 @@ export default function VPNForm<T extends VpnCreate>({
     }, [data, formik.setValues])
 
     return (
-        <>
-            <Card>
-                <CardHeader>
-                    <Box>{title}</Box>
-                </CardHeader>
-
-                <CardBody>
-                    <form onSubmit={formik.handleSubmit}>
-                        <FormControl isRequired>
-                            <FormLabel>备注</FormLabel>
-                            <Input
-                                placeholder="备注"
-                                defaultValue={formik.values.mark}
-                                onChange={(e) => {
-                                    updateData((draft) => {
-                                        draft.mark = e.target.value
-                                    })
-                                }}
-                            />
-                            {formik.touched.mark && formik.errors.mark && (
-                                <FormErrorMessage>
-                                    {formik.errors.mark as string}
-                                </FormErrorMessage>
-                            )}
-                        </FormControl>
-                        <FormControl isRequired mt="1rem">
-                            <FormLabel>用户名</FormLabel>
-                            <Input
-                                placeholder="用户名"
-                                defaultValue={formik.values.username}
-                                onChange={(e) => {
-                                    updateData((draft) => {
-                                        draft.username = e.target.value
-                                    })
-                                }}
-                            />
-                            {formik.touched.username &&
-                                formik.errors.username && (
-                                    <FormErrorMessage>
-                                        {formik.errors.username as string}
-                                    </FormErrorMessage>
-                                )}
-                        </FormControl>
-                        <FormControl isRequired mt="1rem">
-                            <FormLabel>密码</FormLabel>
-                            <InputGroup size="md">
-                                <Input
-                                    pr="4.5rem"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="密码"
-                                    defaultValue={formik.values.password}
-                                    onChange={(e) => {
-                                        updateData((draft) => {
-                                            draft.password = e.target.value
-                                        })
-                                    }}
-                                />
-                                <InputRightElement width="4.5rem">
-                                    <Button
-                                        h="1.75rem"
-                                        size="sm"
-                                        onClick={() =>
-                                            setShowPassword(!showPassword)
-                                        }
-                                    >
-                                        {showPassword ? "Hide" : "Show"}
-                                    </Button>
-                                </InputRightElement>
-                                {formik.touched.password &&
-                                    formik.errors.password && (
-                                        <FormErrorMessage>
-                                            {formik.errors.password as string}
-                                        </FormErrorMessage>
-                                    )}
-                            </InputGroup>
-                        </FormControl>
-                        <FormControl mt="1rem">
-                            <FormLabel>.ovpn文件</FormLabel>
-                            <Flex>
-                                <Button
-                                    colorScheme="teal"
-                                    variant="outline"
-                                    onClick={() => {
-                                        fileInputRef.current?.click()
-                                    }}
-                                >
-                                    <Text fontSize="1rem">选择文件</Text>
-                                </Button>
-                                <Center marginLeft="1rem">
-                                    {ovpnFilename}
-                                </Center>
-                            </Flex>
-                            <Input
-                                ref={fileInputRef}
-                                style={{
-                                    display: "none",
-                                }}
-                                type="file"
-                                accept=".ovpn"
-                                name="file"
-                                onChange={(e) => {
-                                    if (e.target.files && e.target.files[0]) {
-                                        const file = e.target.files[0]
-                                        file.text().then((r) => {
-                                            const filename: string =
-                                                "path" in file
-                                                    ? (file.path as string)
-                                                    : file.name
-                                            setOvpnFilename(filename)
-                                            updateData((draft) => {
-                                                draft.ovpn = r
-                                            })
-                                        })
-                                    }
-                                }}
-                            />
-                            <Textarea
-                                placeholder="OpenVPN配置"
-                                size="md"
-                                mt="1rem"
-                                resize="vertical"
-                                defaultValue={formik.values.ovpn}
-                                rows={8}
-                                onChange={(e) => {
-                                    updateData((draft) => {
-                                        draft.ovpn = e.target.value
-                                    })
-                                }}
-                            />
-                        </FormControl>
-                        <FormControl mt="1rem">
-                            <FormLabel>OTP Secret</FormLabel>
-                            <Input
-                                placeholder="OTP Secret"
-                                defaultValue={formik.values.otp_config.secret}
-                                onChange={(e) => {
-                                    updateData((draft) => {
-                                        draft.otp_config.secret = e.target.value
-                                    })
-                                }}
-                            />
-                        </FormControl>
-                        <FormControl mt="1rem">
-                            <FormLabel>OTP Step</FormLabel>
-                            <NumberInput
-                                min={0}
-                                defaultValue={formik.values.otp_config.step}
-                                onChange={(value) => {
-                                    updateData((draft) => {
-                                        draft.otp_config.step = Number(value)
-                                    })
-                                }}
-                            >
-                                <NumberInputField placeholder="OTP Step" />
-                                <NumberInputStepper>
-                                    <NumberIncrementStepper />
-                                    <NumberDecrementStepper />
-                                </NumberInputStepper>
-                            </NumberInput>
-                        </FormControl>
-                        <FormControl mt="1rem">
-                            <FormLabel>OpenVPN执行文件</FormLabel>
-                            <Input
-                                placeholder="留空使用自带的openvpn"
-                                defaultValue={formik.values.config.executable}
-                                onChange={(e) => {
-                                    updateData((draft) => {
-                                        draft.config.executable = e.target.value
-                                    })
-                                }}
-                            />
-                        </FormControl>
-                        <FormControl mt="1rem">
-                            <FormLabel>网卡</FormLabel>
-                            <Select
-                                placeholder="留空使用默认"
-                                value={formik.values.config.adapter}
-                                onChange={(e) => {
-                                    updateData((draft) => {
-                                        draft.config.adapter = e.target.value
-                                    })
-                                }}
-                            >
-                                {tapList.map((tap) => (
-                                    <option key={tap.guid} value={tap.name}>
-                                        {tap.name}
-                                    </option>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <ButtonGroup mt="1rem">
-                            <Button colorScheme="teal" type="submit">
-                                保存
+        <Card style={{ marginBottom: 16 }} title={title}>
+            <Form onSubmit={() => formik.handleSubmit()} layout="vertical">
+                <FormItem label="备注" required field="mark">
+                    <Input
+                        placeholder="备注"
+                        defaultValue={formik.values.mark}
+                        onChange={(val: string) => updateData((draft) => { (draft as any).mark = val })}
+                    />
+                    {formik.touched.mark && formik.errors.mark && (
+                        <Form.ErrorMessage error={formik.errors.mark as string} />
+                    )}
+                </FormItem>
+                <FormItem label="用户名" required field="username">
+                    <Input
+                        placeholder="用户名"
+                        defaultValue={formik.values.username}
+                        onChange={(val: string) => updateData((draft) => { (draft as any).username = val })}
+                    />
+                    {formik.touched.username && formik.errors.username && (
+                        <Form.ErrorMessage error={formik.errors.username as string} />
+                    )}
+                </FormItem>
+                <FormItem label="密码" required field="password">
+                    <Input
+                        type="password"
+                        placeholder="密码"
+                        style={{ width: '100%' }}
+                        defaultValue={formik.values.password}
+                        onChange={(val: string) => updateData((draft) => { (draft as any).password = val })}
+                    />
+                    {formik.touched.password && formik.errors.password && (
+                        <Form.ErrorMessage error={formik.errors.password as string} />
+                    )}
+                </FormItem>
+                <FormItem label=".ovpn文件">
+                    <Space vertical style={{ width: '100%' }}>
+                        <Space>
+                            <Button type="secondary" theme="outline" onClick={() => fileInputRef.current?.click()}>
+                                选择文件
                             </Button>
-                            <Button onClick={handleCancel}>取消</Button>
-                        </ButtonGroup>
-                    </form>
-                </CardBody>
-            </Card>
-        </>
+                            <span>{ovpnFilename}</span>
+                        </Space>
+                        <input
+                            ref={fileInputRef}
+                            style={{ display: "none" }}
+                            type="file"
+                            accept=".ovpn"
+                            name="file"
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                    const file = e.target.files[0]
+                                    file.text().then((r) => {
+                                        const filename: string = "path" in file ? (file as any).path : file.name
+                                        setOvpnFilename(filename)
+                                        updateData((draft) => { (draft as any).ovpn = r })
+                                    })
+                                }
+                            }}
+                        />
+                        <TextArea
+                            placeholder="OpenVPN配置"
+                            style={{ width: '100%' }}
+                            autosize
+                            defaultValue={formik.values.ovpn}
+                            rows={8}
+                            onChange={(val: string) => updateData((draft) => { (draft as any).ovpn = val })}
+                        />
+                    </Space>
+                </FormItem>
+                <FormItem label="OTP Secret" field="otp_secret">
+                    <Input
+                        placeholder="OTP Secret"
+                        style={{ width: '100%' }}
+                        defaultValue={formik.values.otp_config.secret}
+                        onChange={(val: string) => updateData((draft) => { (draft as any).otp_config.secret = val })}
+                    />
+                </FormItem>
+                <FormItem label="OTP Step" field="otp_step">
+                    <InputNumber
+                        min={0}
+                        style={{ width: '100%' }}
+                        defaultValue={formik.values.otp_config.step}
+                        onChange={(val: any) => updateData((draft) => { (draft as any).otp_config.step = Number(val) })}
+                    />
+                </FormItem>
+                <FormItem label="OpenVPN执行文件" field="exec">
+                    <Input
+                        placeholder="留空使用自带的openvpn"
+                        style={{ width: '100%' }}
+                        defaultValue={formik.values.config.executable}
+                        onChange={(val: string) => updateData((draft) => { (draft as any).config.executable = val })}
+                    />
+                </FormItem>
+                <FormItem label="网卡" field="adapter">
+                    <Select
+                        placeholder="留空使用默认"
+                        style={{ width: '100%' }}
+                        defaultValue={formik.values.config.adapter}
+                        onChange={(val: any) => updateData((draft) => { (draft as any).config.adapter = val })}
+                    >
+                        {tapList.map((tap) => (
+                            <Select.Option key={tap.guid} value={tap.name}>{tap.name}</Select.Option>
+                        ))}
+                    </Select>
+                </FormItem>
+                <FormItem>
+                    <Space>
+                        <Button type="primary" htmlType="submit">保存</Button>
+                        <Button onClick={handleCancel}>取消</Button>
+                    </Space>
+                </FormItem>
+            </Form>
+        </Card>
     )
 }

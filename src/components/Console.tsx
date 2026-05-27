@@ -1,15 +1,14 @@
-import { Box, BoxProps } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
 import Connections from "@/api/connections.ts"
 
-type ConsoleProps = BoxProps & {
+type ConsoleProps = {
     vpnId: string
 }
 
 export default function Console(props: ConsoleProps) {
-    const { vpnId, ...restProps } = props
+    const { vpnId } = props
 
-    const messagesRef = useRef<HTMLElement>(null)
+    const messagesRef = useRef<HTMLDivElement>(null)
 
     const last_scroll_top = useRef(0)
     useEffect(() => {
@@ -33,24 +32,23 @@ export default function Console(props: ConsoleProps) {
         return () => {
             clearInterval(intervalId)
         }
-    }, [])
+    }, [vpnId])
 
     return logs.length > 0 ? (
-        <Box
+        <div
             ref={messagesRef}
-            {...restProps}
             style={{
                 whiteSpace: "pre",
                 backgroundColor: "#333",
-                overflow: "scroll",
+                overflow: "auto",
                 color: "#e0e0e0",
                 maxHeight: "60vh",
                 minHeight: "40vh",
             }}
         >
             {logs.join("\n")}
-        </Box>
+        </div>
     ) : (
-        <Box minHeight="40vh">当前无日志</Box>
+        <div style={{ minHeight: "40vh" }}>当前无日志</div>
     )
 }

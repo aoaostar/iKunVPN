@@ -1,53 +1,40 @@
-import { createStandaloneToast, ToastId } from "@chakra-ui/react"
+import { Toast } from '@douyinfe/semi-ui';
 
-const { toast } = createStandaloneToast({
-    defaultOptions: {
-        position: "top-right",
-        duration: 2000,
-        isClosable: true,
+const ToastUtil = {
+    success(content: string, description: string = "") {
+        if (description) {
+            Toast.success(`${content}: ${description}`);
+        } else {
+            Toast.success(content);
+        }
     },
-})
-
-const Toast = {
-    toast: toast,
-    success(title: string, message: string = "") {
-        return toast({
-            title: title,
-            description: message,
-            status: "success",
-        })
+    error(content: string, description: string = "") {
+        if (description) {
+            Toast.error(`${content}: ${description}`);
+        } else {
+            Toast.error(content);
+        }
     },
-    error(title: string, message: string = "") {
-        return toast({
-            title: title,
-            description: message,
-            status: "error",
-        })
+    warning(content: string, description: string = "") {
+        if (description) {
+            Toast.warning(`${content}: ${description}`);
+        } else {
+            Toast.warning(content);
+        }
     },
-    warning(title: string, message: string = "") {
-        return toast({
-            title: title,
-            description: message,
-            status: "warning",
-        })
+    info(content: string, description: string = "") {
+        if (description) {
+            Toast.info(`${content}: ${description}`);
+        } else {
+            Toast.info(content);
+        }
     },
-    info(title: string, message: string = "") {
-        return toast({
-            title: title,
-            description: message,
-            status: "info",
-        })
+    loading(content: string, _description: string = "") {
+        const id = (Toast as any).loading(content);
+        return id;
     },
-    loading(title: string, message: string = "") {
-        return toast({
-            title: title,
-            description: message,
-            status: "loading",
-            duration: null,
-        })
-    },
-    close(id: ToastId) {
-        return toast.close(id)
+    close(id: string) {
+        Toast.close(id);
     },
 }
-export default Toast
+export default ToastUtil
