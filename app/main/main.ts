@@ -8,7 +8,9 @@ import initIpcMain from "./ipc_main"
 import initUpdate from "./autoupdater"
 import { autoUpdater } from "electron-updater"
 import { setup_db } from "./db/db"
+import log from "electron-log/main"
 
+Object.assign(console, log.functions)
 const appPath = app.getAppPath()
 
 const createWindow = () => {

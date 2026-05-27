@@ -1,4 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron"
+import log from "electron-log/preload"
+
+Object.assign(console, log.functions)
 
 const db = {
     vpn: {
@@ -75,3 +78,4 @@ contextBridge.exposeInMainWorld("electronAPI", {
         // 调用 receive 返回的 cleanup 函数即可
     },
 })
+
