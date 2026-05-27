@@ -39,11 +39,14 @@ export default function initIpcMain() {
     ipcMain.handle("connections/logs", async (_, id: string) => {
         return await Connections.logs(id)
     })
-    ipcMain.handle("connections/showAdapters", async (_) => {
-        return await Connections.showAdapters()
-    })
     ipcMain.handle("connections/installTap", async (_) => {
         return await Connections.installTap()
+    })
+    ipcMain.handle("connections/checkTapInstalled", async (_) => {
+        return await Connections.checkTapInstalled()
+    })
+    ipcMain.handle("connections/uninstallTap", async (_) => {
+        return await Connections.uninstallTap()
     })
     ipcMain.handle("connections/listTaps", async (_) => {
         return await Connections.listTaps()

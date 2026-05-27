@@ -3,10 +3,11 @@ import Connections from "@/api/connections.ts"
 
 type ConsoleProps = {
     vpnId: string
+    visible?: boolean
 }
 
 export default function Console(props: ConsoleProps) {
-    const { vpnId } = props
+    const { vpnId, visible = true } = props
 
     const messagesRef = useRef<HTMLDivElement>(null)
 
@@ -25,6 +26,8 @@ export default function Console(props: ConsoleProps) {
     const [logs, setLogs] = useState<string[]>([])
 
     useEffect(() => {
+        if (!visible) return
+
         const intervalId = setInterval(async () => {
             const logs = await Connections.logs(vpnId)
             setLogs(logs)
@@ -32,7 +35,7 @@ export default function Console(props: ConsoleProps) {
         return () => {
             clearInterval(intervalId)
         }
-    }, [vpnId])
+    }, [vpnId, visible])
 
     return logs.length > 0 ? (
         <div

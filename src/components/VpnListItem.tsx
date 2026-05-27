@@ -120,29 +120,33 @@ export default function VpnListItem({
 
     return (
         <>
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 0',
-                borderBottom: '1px solid #f0f0f0',
-            }}>
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px 0",
+                    borderBottom: "1px solid #f0f0f0",
+                }}
+            >
                 {/* 左侧：信息区 */}
-                <Space size="medium">
-                    <Tag color="teal" style={{ fontSize: 13 }}>{vpnDetail.mark}</Tag>
-                    <span style={{ color: '#666' }}>{vpnDetail.username}</span>
+                <Space>
+                    <Tag color="teal" style={{ fontSize: 13 }}>
+                        {vpnDetail.mark}
+                    </Tag>
+                    <span style={{ color: "#666" }}>{vpnDetail.username}</span>
                     {serverIp && (
-                        <Tag color="teal" style={{ fontSize: 12 }}>{serverIp}</Tag>
+                        <Tag color="teal" style={{ fontSize: 12 }}>
+                            {serverIp}
+                        </Tag>
                     )}
-                    {status === Status.Connecting && (
-                        <Spin size="small" />
-                    )}
+                    {status === Status.Connecting && <Spin size="small" />}
                 </Space>
 
                 {/* 右侧：状态 & 操作区 */}
-                <Space size="small">
+                <Space >
                     {/* 状态标签 */}
-                    <span style={{ minWidth: 60, textAlign: 'center' }}>
+                    <span style={{ minWidth: 60, textAlign: "center" }}>
                         {getStatusTag()}
                     </span>
 
@@ -176,13 +180,16 @@ export default function VpnListItem({
                     )}
 
                     {/* 工具按钮 */}
-                    <Button size="small" onClick={() => navigate(`/detail/${vpnDetail.id}`)}>
+                    <Button
+                        size="small"
+                        onClick={() => navigate(`/detail/${vpnDetail.id}`)}
+                    >
                         修改
                     </Button>
                     <Button size="small" onClick={() => setModalVisible(true)}>
                         日志
                     </Button>
-                    <Button size="small" danger onClick={handleDelete}>
+                    <Button size="small" type="danger" onClick={handleDelete}>
                         删除
                     </Button>
                 </Space>
@@ -190,12 +197,18 @@ export default function VpnListItem({
 
             <Modal
                 visible={modalVisible}
-                onClose={() => setModalVisible(false)}
+                onCancel={() => setModalVisible(false)}
+                onOk={() => setModalVisible(false)}
                 footer={null}
                 title="日志"
                 size="large"
+                modalRender={(node) => (
+                    <div style={{ maxWidth: '90vw' }}>
+                        {node}
+                    </div>
+                )}
             >
-                <Console vpnId={vpnDetail.id}></Console>
+                <Console vpnId={vpnDetail.id} visible={modalVisible}></Console>
             </Modal>
         </>
     )

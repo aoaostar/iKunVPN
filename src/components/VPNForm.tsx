@@ -161,7 +161,6 @@ export default function VPNForm({
                             </Space>
                             <TextArea
                                 placeholder="粘贴OpenVPN配置内容"
-                                autosize
                                 rows={10}
                                 value={(formValues as any).ovpn}
                                 onChange={(val: string) => updateField("ovpn", val)}

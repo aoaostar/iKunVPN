@@ -27,6 +27,8 @@ export default function Home() {
     const [vpnData, setVpnData] = useState<VPNDetail[]>([])
     const [autoReconnect, setAutoReconnect] = useState(false)
     const [installingTap, setInstallingTap] = useState(false)
+    const [uninstallingTap, setUninstallingTap] = useState(false)
+    const [tapInstalled, setTapInstalled] = useState(false)
     const [tapList, setTapList] = useState<Adapter[]>([])
     const [showTapModal, setShowTapModal] = useState(false)
     const [newTapName, setNewTapName] = useState("")
@@ -43,6 +45,15 @@ export default function Home() {
         }
     }, [])
 
+    const loadTapStatus = useCallback(async () => {
+        try {
+            const installed = await Connections.checkTapInstalled()
+            setTapInstalled(installed)
+        } catch (e: any) {
+            setTapInstalled(false)
+        }
+    }, [])
+
     useEffect(() => {
         Vpn.all().then((data) => {
             setVpnData(data)
@@ -51,7 +62,8 @@ export default function Home() {
 
     useEffect(() => {
         loadTapList()
-    }, [loadTapList])
+        loadTapStatus()
+    }, [loadTapList, loadTapStatus])
 
     const handleInstallTap = useCallback(async () => {
         setInstallingTap(true)
@@ -59,12 +71,27 @@ export default function Home() {
             await Connections.installTap()
             Toast.success("TAP 驱动安装成功")
             loadTapList()
+            loadTapStatus()
         } catch (e: any) {
             Toast.error("TAP 驱动安装失败", e.message || e)
         } finally {
             setInstallingTap(false)
         }
-    }, [loadTapList])
+    }, [loadTapList, loadTapStatus])
+
+    const handleUninstallTap = useCallback(async () => {
+        setUninstallingTap(true)
+        try {
+            await Connections.uninstallTap()
+            Toast.success("TAP 驱动卸载成功")
+            loadTapList()
+            loadTapStatus()
+        } catch (e: any) {
+            Toast.error("TAP 驱动卸载失败", e.message || e)
+        } finally {
+            setUninstallingTap(false)
+        }
+    }, [loadTapList, loadTapStatus])
 
     const handleCreateTap = useCallback(async () => {
         if (!newTapName.trim()) {
@@ -179,14 +206,27 @@ export default function Home() {
                                     margin: "1rem 0",
                                 }}
                             >
-                                <Button
-                                    loading={installingTap}
-                                    size="small"
-                                    onClick={handleInstallTap}
-                                    theme="outline"
-                                >
-                                    安装TAP
-                                </Button>
+                                {tapInstalled ? (
+                                    <Button
+                                        loading={uninstallingTap}
+                                        size="small"
+                                        danger
+                                        onClick={handleUninstallTap}
+                                        theme="outline"
+                                    >
+                                        卸载 TAP
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        loading={installingTap}
+                                        size="small"
+                                        onClick={handleInstallTap}
+                                        theme="outline"
+                                        disabled={tapInstalled}
+                                    >
+                                        安装 TAP
+                                    </Button>
+                                )}
                                 <Button
                                     size="small"
                                     loading={refreshing}

@@ -12,10 +12,11 @@ export interface IConnections {
     status: (id: string) => Promise<Status>
     logs: (id: string) => Promise<string[]>
     installTap: () => Promise<string>
+    checkTapInstalled: () => Promise<boolean>
+    uninstallTap: () => Promise<void>
     listTaps: () => Promise<Adapter[]>
     createTap: (name: string) => Promise<Adapter>
     deleteTap: (guidOrName: string) => Promise<void>
-    showAdapters: () => Promise<Adapter[]>
 }
 
 export interface IDialog {

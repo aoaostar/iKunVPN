@@ -44,11 +44,12 @@ export default class Connection {
 
         this.log.transports.file.fileName = `${this.log.logId}.log`
 
-
         this.log.transports.console.level = "info"
-        this.log.transports.console.format = '[{y}-{m}-{d} {h}:{i}:{s}] [{level}] {text}';
+        this.log.transports.console.format =
+            "[{y}-{m}-{d} {h}:{i}:{s}] [{level}] {text}"
         this.log.transports.file.level = "info"
-        this.log.transports.file.format = '[{y}-{m}-{d} {h}:{i}:{s}] [{level}] {text}';
+        this.log.transports.file.format =
+            "[{y}-{m}-{d} {h}:{i}:{s}] [{level}] {text}"
     }
 
     get ovpn_file(): string {
@@ -68,7 +69,10 @@ export default class Connection {
     }
 
     get logs(): string[] {
-        const data = fs.readFileSync(this.log.transports.file.getFile().path, 'utf8');
+        const data = fs.readFileSync(
+            this.log.transports.file.getFile().path,
+            "utf8"
+        )
         return data.split("\n")
     }
 
@@ -81,69 +85,212 @@ export default class Connection {
         })
     }
 
+    // public async connect(): Promise<StatusResponse> {
+    //     return new Promise(
+    //         async (
+    //             resolve: (value: StatusResponse) => void,
+    //             reject: (value: StatusResponse) => void
+    //         ) => {
+    //             let password = this.vpnSchema.password
+    //             if (this.vpnSchema.otp_config.secret) {
+    //                 const otp = new OTP({
+    //                     secret: this.vpnSchema.otp_config.secret,
+    //                     timeSlice: this.vpnSchema.otp_config.step,
+    //                     keySize: 6,
+    //                 })
+    //                 password += otp.totp(Date.now())
+    //             }
+    //             const directoryPath = path.dirname(this.ovpn_file)
+    //             await this.kill()
+    //
+    //             this.sendStatus(Status.Connecting)
+    //
+    //             try {
+    //                 await fsPromises.access(directoryPath)
+    //             } catch (err: any) {
+    //                 if (err.code === "ENOENT") {
+    //                     await fsPromises.mkdir(directoryPath, {
+    //                         recursive: true,
+    //                     })
+    //                 }
+    //             }
+    //             await fsPromises.writeFile(this.ovpn_file, this.vpnSchema.ovpn)
+    //             await fsPromises.writeFile(
+    //                 this.credentials_file,
+    //                 `${this.vpnSchema.username}\n${password}`
+    //             )
+    //             try {
+    //                 const command_args = [
+    //                     "--config",
+    //                     path.relative(this.cwd_path, this.ovpn_file),
+    //                     "--auth-user-pass",
+    //                     path.relative(this.cwd_path, this.credentials_file),
+    //                     "--auth-nocache",
+    //                     "--ping",
+    //                     "10",
+    //                     "--ping-exit",
+    //                     "120",
+    //                     "--remap-usr1",
+    //                     "SIGTERM",
+    //                     "--auth-retry",
+    //                     "nointeract",
+    //                     ...(this.vpnSchema.config.adapter
+    //                         ? ["--dev-node", this.vpnSchema.config.adapter]
+    //                         : []),
+    //                 ]
+    //
+    //                 this.log.info(
+    //                     `启动连接: ${this.executable} ${command_args.join(" ")}`
+    //                 )
+    //                 this.process = spawn(this.executable, command_args, {
+    //                     cwd: this.cwd_path,
+    //                 })
+    //             } catch (e) {
+    //                 this.log.info(`启动失败: ${e}`)
+    //                 this.sendStatus(Status.Stop)
+    //                 reject({
+    //                     status: Status.Stop,
+    //                     message: "连接失败",
+    //                 })
+    //                 return
+    //             }
+    //
+    //             this.process.stdout.on("data", (message: Buffer) => {
+    //                 const messageStr = message.toString()
+    //                 this.log.info(messageStr)
+    //                 if (
+    //                     messageStr.includes(
+    //                         "Initialization Sequence Completed With Errors"
+    //                     )
+    //                 ) {
+    //                     this.kill()
+    //                     reject({
+    //                         status: Status.Stop,
+    //                         message: "连接失败",
+    //                     })
+    //                     return
+    //                 }
+    //                 if (
+    //                     messageStr.includes("Initialization Sequence Completed")
+    //                 ) {
+    //                     this.sendStatus(Status.Success)
+    //                     resolve({
+    //                         status: Status.Success,
+    //                         message: "连接成功",
+    //                     })
+    //                 }
+    //                 for (const message of ["TLS: soft reset"]) {
+    //                     if (messageStr.includes(message)) {
+    //                         this.kill()
+    //                         return
+    //                     }
+    //                 }
+    //             })
+    //
+    //             this.process.stderr.on("data", (message: Buffer) => {
+    //                 this.log.error(message.toString())
+    //             })
+    //
+    //             this.process.on("exit", (code, signal) => {
+    //                 this.log.warn(`进程退出，退出码: ${code} signal: ${signal}`)
+    //                 if (this.__status !== Status.Stop) {
+    //                     this.sendStatus(Status.Error)
+    //                 }
+    //                 reject({
+    //                     status: Status.Error,
+    //                     message: "连接已断开",
+    //                 })
+    //             })
+    //             this.process.on("error", (err) => {
+    //                 this.log.error(`子进程出错: ${err}`)
+    //                 this.sendStatus(Status.Error)
+    //                 reject({
+    //                     status: Status.Error,
+    //                     message: "连接已断开",
+    //                 })
+    //             })
+    //         }
+    //     )
+    // }
     public async connect(): Promise<StatusResponse> {
-        return new Promise(
-            async (
-                resolve: (value: StatusResponse) => void,
-                reject: (value: StatusResponse) => void
-            ) => {
-                let password = this.vpnSchema.password
-                if (this.vpnSchema.otp_config.secret) {
-                    const otp = new OTP({
-                        secret: this.vpnSchema.otp_config.secret,
-                        timeSlice: this.vpnSchema.otp_config.step,
-                        keySize: 6,
-                    })
-                    password += otp.totp(Date.now())
-                }
-                const directoryPath = path.dirname(this.ovpn_file)
-                await this.kill()
+        let password = this.vpnSchema.password
 
-                this.sendStatus(Status.Connecting)
+        if (this.vpnSchema.otp_config.secret) {
+            const otp = new OTP({
+                secret: this.vpnSchema.otp_config.secret,
+                timeSlice: this.vpnSchema.otp_config.step,
+                keySize: 6,
+            })
+            password += otp.totp(Date.now())
+        }
 
-                try {
-                    await fsPromises.access(directoryPath)
-                } catch (err: any) {
-                    if (err.code === "ENOENT") {
-                        await fsPromises.mkdir(directoryPath, {
-                            recursive: true,
-                        })
-                    }
-                }
-                await fsPromises.writeFile(this.ovpn_file, this.vpnSchema.ovpn)
-                await fsPromises.writeFile(
-                    this.credentials_file,
-                    `${this.vpnSchema.username}\n${password}`
+        const directoryPath = path.dirname(this.ovpn_file)
+
+        await this.kill()
+        this.sendStatus(Status.Connecting)
+
+        try {
+            await fsPromises.access(directoryPath)
+        } catch (err: any) {
+            if (err.code === "ENOENT") {
+                await fsPromises.mkdir(directoryPath, { recursive: true })
+            }
+        }
+
+        await fsPromises.writeFile(this.ovpn_file, this.vpnSchema.ovpn)
+        await fsPromises.writeFile(
+            this.credentials_file,
+            `${this.vpnSchema.username}\n${password}`
+        )
+
+        return new Promise((resolve, reject) => {
+            try {
+                const command_args = [
+                    "--config",
+                    path.relative(this.cwd_path, this.ovpn_file),
+                    "--auth-user-pass",
+                    path.relative(this.cwd_path, this.credentials_file),
+                    "--auth-nocache",
+                    "--ping",
+                    "10",
+                    "--ping-exit",
+                    "120",
+                    "--remap-usr1",
+                    "SIGTERM",
+                    "--auth-retry",
+                    "nointeract",
+                    ...(this.vpnSchema.config.adapter
+                        ? ["--dev-node", this.vpnSchema.config.adapter]
+                        : []),
+                ]
+
+                this.log.info(
+                    `启动连接: ${this.executable} ${command_args.join(" ")}`
                 )
-                try {
-                    const command_args = [
-                        "--config",
-                        path.relative(this.cwd_path, this.ovpn_file),
-                        "--auth-user-pass",
-                        path.relative(this.cwd_path, this.credentials_file),
-                        "--auth-nocache",
-                        "--ping",
-                        "10",
-                        "--ping-exit",
-                        "120",
-                        "--remap-usr1",
-                        "SIGTERM",
-                        "--auth-retry",
-                        "nointeract",
-                        ...(this.vpnSchema.config.adapter
-                            ? ["--dev-node", this.vpnSchema.config.adapter]
-                            : []),
-                    ]
 
-                    this.log.info(
-                        `启动连接: ${this.executable} ${command_args.join(" ")}`
+                this.process = spawn(this.executable, command_args, {
+                    cwd: this.cwd_path,
+                })
+            } catch (e) {
+                this.log.info(`启动失败: ${e}`)
+                this.sendStatus(Status.Stop)
+                reject({
+                    status: Status.Stop,
+                    message: "连接失败",
+                })
+                return
+            }
+
+            this.process.stdout.on("data", (message: Buffer) => {
+                const messageStr = message.toString()
+                this.log.info(messageStr)
+
+                if (
+                    messageStr.includes(
+                        "Initialization Sequence Completed With Errors"
                     )
-                    this.process = spawn(this.executable, command_args, {
-                        cwd: this.cwd_path,
-                    })
-                } catch (e) {
-                    this.log.info(`启动失败: ${e}`)
-                    this.sendStatus(Status.Stop)
+                ) {
+                    this.kill()
                     reject({
                         status: Status.Stop,
                         message: "连接失败",
@@ -151,66 +298,47 @@ export default class Connection {
                     return
                 }
 
-                this.process.stdout.on("data", (message: Buffer) => {
-                    const messageStr = message.toString()
-                    this.log.info(messageStr)
-                    if (
-                        messageStr.includes(
-                            "Initialization Sequence Completed With Errors"
-                        )
-                    ) {
-                        this.kill()
-                        reject({
-                            status: Status.Stop,
-                            message: "连接失败",
-                        })
-                        return
-                    }
-                    if (
-                        messageStr.includes("Initialization Sequence Completed")
-                    ) {
-                        this.sendStatus(Status.Success)
-                        resolve({
-                            status: Status.Success,
-                            message: "连接成功",
-                        })
-                    }
-                    for (const message of ["TLS: soft reset"]) {
-                        if (messageStr.includes(message)) {
-                            this.kill()
-                            return
-                        }
-                    }
-                })
-
-                this.process.stderr.on("data", (message: Buffer) => {
-                    this.log.error(message.toString())
-                })
-
-                this.process.on("exit", (code, signal) => {
-                    this.log.warn(
-                        `进程退出，退出码: ${code} signal: ${signal}`
-                    )
-                    if (this.__status !== Status.Stop) {
-                        this.sendStatus(Status.Error)
-                    }
-                    reject({
-                        status: Status.Error,
-                        message: "连接已断开",
+                if (messageStr.includes("Initialization Sequence Completed")) {
+                    this.sendStatus(Status.Success)
+                    resolve({
+                        status: Status.Success,
+                        message: "连接成功",
                     })
-                })
-                this.process.on("error", (err) => {
-                    this.log.error(`子进程出错: ${err}`)
+                }
+
+                if (messageStr.includes("TLS: soft reset")) {
+                    this.kill()
+                }
+            })
+
+            this.process.stderr.on("data", (message: Buffer) => {
+                this.log.error(message.toString())
+            })
+
+            this.process.on("exit", (code, signal) => {
+                this.log.warn(`进程退出，退出码: ${code} signal: ${signal}`)
+
+                if (this.__status !== Status.Stop) {
                     this.sendStatus(Status.Error)
-                    reject({
-                        status: Status.Error,
-                        message: "连接已断开",
-                    })
-                })
-            }
-        )
-    }
+                }
 
+                reject({
+                    status: Status.Error,
+                    message: "连接已断开",
+                })
+            })
+
+            this.process.on("error", (err) => {
+                this.log.error(`子进程出错: ${err}`)
+                this.sendStatus(Status.Error)
+
+                reject({
+                    status: Status.Error,
+                    message: "连接已断开",
+                })
+            })
+        })
+    }
     public async disconnect(): Promise<void> {
         await this.kill()
         this.sendStatus(Status.Stop)

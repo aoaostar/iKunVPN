@@ -34,6 +34,12 @@ export const Connections = {
     installTap: async (): Promise<string> => {
         return await window.electronAPI.connections.installTap()
     },
+    checkTapInstalled: async (): Promise<boolean> => {
+        return await window.electronAPI.connections.checkTapInstalled()
+    },
+    uninstallTap: async (): Promise<void> => {
+        return await window.electronAPI.connections.uninstallTap()
+    },
     listTaps: async (): Promise<Adapter[]> => {
         return await window.electronAPI.connections.listTaps()
     },
@@ -42,9 +48,6 @@ export const Connections = {
     },
     deleteTap: async (guidOrName: string): Promise<void> => {
         return await window.electronAPI.connections.deleteTap(guidOrName)
-    },
-    showAdapters: async (): Promise<Adapter[]> => {
-        return await window.electronAPI.connections.showAdapters()
     },
     receive: async (func: (data: StatusNotification) => void) => {
         return await window.electronAPI.receive("client/connections/status", func)

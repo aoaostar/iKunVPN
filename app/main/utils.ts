@@ -17,8 +17,7 @@ export function executeCommand(
     console.log(`Executing command: ${command}`)
     return new Promise((resolve, reject) => {
         exec(command, options, (error, stdout, stderr) => {
-            console.log(stdout)
-            console.log(stderr)
+            console.log(`Command executed: ${command}, stdout: ${stdout}, stderr: ${stderr}, error: ${error}`)
             if (error) {
                 reject(error.toString())
             }

@@ -7,9 +7,8 @@ import { executeCommand } from "./utils"
 
 export type Adapter = {
     name: string
-    id: string
     type: string
-    guid?: string
+    guid: string
 }
 
 export default class Connections {
@@ -60,12 +59,12 @@ export default class Connections {
         }
     }
 
-    static async showAdapters(): Promise<Adapter[]> {
-        const stdout = await executeCommand(`openvpn.exe  --show-adapters`, {
+    static async listTaps(): Promise<Adapter[]> {
+        const stdout = await executeCommand(`openvpn.exe --show-adapters`, {
             cwd: this.cwd,
         })
 
-        log.debug(`showAdapters: ${stdout}`)
+        log.debug(`listTaps: ${stdout}`)
         const strings = stdout.split("\n")
         const adapters_str = strings.length > 0 ? strings.slice(1) : []
         const adapters: Adapter[] = []
@@ -80,33 +79,10 @@ export default class Connections {
                 name: name.slice(1, -1),
                 id,
                 type,
+                guid: id,
             })
         }
         return adapters
-    }
-
-    static async listTaps(): Promise<Adapter[]> {
-        const stdout = await executeCommand(`tapctl.exe list`, {
-            cwd: this.cwd,
-        })
-        log.debug(`listTaps: ${stdout}`)
-
-        const lines = stdout.split("\n").filter((l) => l.trim())
-        const taps: Adapter[] = []
-        for (const line of lines) {
-            if (line.startsWith("GUID")) continue
-            const match = line.match(/({[0-9A-Za-z-]+})\s+(.+)/)
-            log.debug(`line: ${line}, match: ${match}`)
-            if (match) {
-                taps.push({
-                    guid: match[1],
-                    name: match[2],
-                    id: match[3],
-                    type: "tap",
-                })
-            }
-        }
-        return taps
     }
 
     static async createTap(name: string): Promise<Adapter> {
@@ -124,6 +100,23 @@ export default class Connections {
 
     static async deleteTap(guidOrName: string): Promise<void> {
         await executeCommand(`tapctl.exe delete "${guidOrName}"`, {
+            cwd: this.cwd,
+        })
+    }
+
+    static async checkTapInstalled(): Promise<boolean> {
+        try {
+            const stdout = await executeCommand(`tapinstall.exe find tap0901`, {
+                cwd: this.cwd,
+            })
+            return !stdout.includes("No matching devices found.")
+        } catch {
+            return false
+        }
+    }
+
+    static async uninstallTap() {
+        await executeCommand(`tapinstall.exe remove tap0901`, {
             cwd: this.cwd,
         })
     }

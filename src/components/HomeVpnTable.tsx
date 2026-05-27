@@ -147,7 +147,7 @@ function ActionCell({
                     <Button size="small" onClick={() => setModalVisible(true)}>
                         日志
                     </Button>
-                    <Button size="small" danger onClick={doDelete}>
+                    <Button size="small" type="danger" onClick={doDelete}>
                         删除
                     </Button>
                 </Space>
@@ -155,12 +155,13 @@ function ActionCell({
 
             <Modal
                 visible={modalVisible}
-                onClose={() => setModalVisible(false)}
+                onCancel={() => setModalVisible(false)}
+                onOk={() => setModalVisible(false)}
                 footer={null}
                 title="日志"
                 size="large"
             >
-                <Console vpnId={record.id} />
+                <Console vpnId={record.id} visible={modalVisible} />
             </Modal>
         </>
     )

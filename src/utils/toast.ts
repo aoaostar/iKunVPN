@@ -1,40 +1,42 @@
-import { Toast } from '@douyinfe/semi-ui';
+import { Toast } from "@douyinfe/semi-ui"
 
 const ToastUtil = {
     success(content: string, description: string = "") {
         if (description) {
-            Toast.success(`${content}: ${description}`);
+            Toast.success(`${content}: ${description}`)
         } else {
-            Toast.success(content);
+            Toast.success(content)
         }
     },
     error(content: string, description: string = "") {
         if (description) {
-            Toast.error(`${content}: ${description}`);
+            Toast.error(`${content}: ${description}`)
         } else {
-            Toast.error(content);
+            Toast.error(content)
         }
     },
     warning(content: string, description: string = "") {
         if (description) {
-            Toast.warning(`${content}: ${description}`);
+            Toast.warning(`${content}: ${description}`)
         } else {
-            Toast.warning(content);
+            Toast.warning(content)
         }
     },
     info(content: string, description: string = "") {
         if (description) {
-            Toast.info(`${content}: ${description}`);
+            Toast.info(`${content}: ${description}`)
         } else {
-            Toast.info(content);
+            Toast.info(content)
         }
     },
     loading(content: string, _description: string = "") {
-        const id = (Toast as any).loading(content);
-        return id;
+        return Toast.info({
+            content,
+            duration: 0,
+        })
     },
     close(id: string) {
-        Toast.close(id);
+        Toast.close(id)
     },
 }
 export default ToastUtil
