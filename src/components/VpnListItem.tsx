@@ -6,7 +6,7 @@ import {
     Modal,
 } from '@douyinfe/semi-ui';
 import { Vpn, VPNDetail } from "@/api/vpn.ts"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Connections, { Status, StatusNotification } from "@/api/connections.ts"
 import Toast from "@/utils/toast.ts"
 import { useNavigate } from "react-router-dom"
@@ -21,33 +21,50 @@ export default function VpnListItem({
     handleDelete: (vpnDetail: VPNDetail) => void
     autoReconnect: boolean
 }) {
-    const [status, setStatus] = useState(Status.Stop)
+    const [status, setStatus] = useState<Status>(Status.Stop)
     const [serverIp, setServerIp] = useState("")
+    const statusRef = useRef<Status>(Status.Stop)
+
+    // 保持 statusRef 与 status 状态同步
+    useEffect(() => {
+        statusRef.current = status
+    }, [status])
 
     const navigate = useNavigate()
     const [modalVisible, setModalVisible] = useState(false)
 
     const handleConnect = useCallback(async () => {
-        if (status === Status.Connecting) {
+        if (statusRef.current === Status.Connecting) {
             return
         }
+        statusRef.current = Status.Connecting
         setStatus(Status.Connecting)
 
         try {
             const r = await Connections.connect(vpnDetail.id)
-            setStatus(r.status)
-            Toast.success("连接成功")
+            if (r.status === Status.Success) {
+                statusRef.current = Status.Success
+                setStatus(Status.Success)
+                Toast.success("连接成功")
+            }
         } catch (e: any) {
+            statusRef.current = Status.Error
+            setStatus(Status.Error)
             Toast.error("连接失败", e.message)
         }
-    }, [status, vpnDetail.id])
+    }, [vpnDetail.id])
 
     const handleDisConnect = useCallback(async () => {
+        statusRef.current = Status.Connecting
+        setStatus(Status.Connecting)
         try {
             const r = await Connections.disconnect(vpnDetail.id)
-            setStatus(r.status)
+            statusRef.current = Status.Stop
+            setStatus(Status.Stop)
             Toast.success("操作成功")
         } catch (e: any) {
+            statusRef.current = Status.Error
+            setStatus(Status.Error)
             Toast.error("操作失败", e.message)
         }
     }, [vpnDetail.id])
@@ -68,7 +85,9 @@ export default function VpnListItem({
             if (r.current.id !== vpnDetail.id) {
                 return
             }
-            setStatus(r.status)
+            const newStatus = r.status
+            statusRef.current = newStatus
+            setStatus(newStatus)
 
             switch (r.status) {
                 case Status.Error:
@@ -76,10 +95,8 @@ export default function VpnListItem({
                     break
             }
         }
-        Connections.receive(func).then()
-        return () => {
-            Connections.removeAllListeners().then()
-        }
+        const cleanup = Connections.receive(func)
+        return () => cleanup?.()
     }, [vpnDetail.id])
 
     useEffect(() => {
@@ -92,20 +109,21 @@ export default function VpnListItem({
 
     useEffect(() => {
         Connections.status(vpnDetail.id).then((r: Status) => {
+            statusRef.current = r
             setStatus(r)
         })
     }, [vpnDetail.id])
 
     useEffect(() => {
         const interval = setInterval(async () => {
-            if (autoReconnect && status === Status.Error) {
+            if (autoReconnect && statusRef.current === Status.Error) {
                 await handleConnect()
             }
         }, 5 * 1000)
         return () => {
             clearInterval(interval)
         }
-    }, [status, autoReconnect, handleConnect])
+    }, [autoReconnect, handleConnect])
 
     const getStatusTag = () => {
         switch (status) {

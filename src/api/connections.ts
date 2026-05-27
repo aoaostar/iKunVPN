@@ -49,13 +49,11 @@ export const Connections = {
     deleteTap: async (guidOrName: string): Promise<void> => {
         return await window.electronAPI.connections.deleteTap(guidOrName)
     },
-    receive: async (func: (data: StatusNotification) => void) => {
-        return await window.electronAPI.receive("client/connections/status", func)
+    receive:  (func: (data: StatusNotification) => void) => {
+        return window.electronAPI.receive("client/connections/status", func)
     },
     removeAllListeners: async () => {
-        return await window.electronAPI.removeAllListeners(
-            "client/connections/status"
-        )
+        // 不再使用全局移除，由各组件自行管理监听器生命周期
     },
 }
 export default Connections

@@ -25,8 +25,14 @@ export default class Connections {
         if (![Status.Stop, Status.Error].includes(await this.status(id))) {
             throw new Error("VPN is connecting")
         }
-        const connection = new Connection(vpnSchema)
-        this.connections[vpnSchema.id] = connection
+
+        let connection: Connection
+        if (id in this.connections) {
+            connection = this.connections[id]
+        } else {
+            connection = new Connection(vpnSchema)
+            this.connections[vpnSchema.id] = connection
+        }
         return await connection.connect()
     }
 

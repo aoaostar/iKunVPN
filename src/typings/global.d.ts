@@ -35,7 +35,7 @@ export interface IElectronAPI {
     db: IDb
     connections: IConnections
     dialog: IDialog
-    receive: (channel: string, func: (...args) => void) => Promise<void>
+    receive: (channel: string, func: (...args) => void) => ()=>void
     removeAllListeners: (channel: string) => Promise<void>
 }
 

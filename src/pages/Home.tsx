@@ -169,7 +169,7 @@ export default function Home() {
                 <Button
                     type="secondary"
                     size="small"
-                    danger
+                    type="danger"
                     onClick={() => handleDeleteTap(record.guid!)}
                 >
                     删除
@@ -210,7 +210,7 @@ export default function Home() {
                                     <Button
                                         loading={uninstallingTap}
                                         size="small"
-                                        danger
+                                        type="danger"
                                         onClick={handleUninstallTap}
                                         theme="outline"
                                     >

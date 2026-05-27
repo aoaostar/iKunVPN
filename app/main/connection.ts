@@ -77,6 +77,7 @@ export default class Connection {
     }
 
     private sendStatus(status: Status): void {
+        console.log("status: " + status)
         this.__status = status
 
         Store.MainWindow.webContents.send("client/connections/status", {

@@ -52,7 +52,7 @@ const connections = {
     },
 }
 const dialogApi = {
-    showOpenDialog(options?: any) {
+    showOpenDialog(options?: unknown) {
         return ipcRenderer.invoke("dialog/showOpenDialog", options)
     },
 }
@@ -61,15 +61,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
     connections: connections,
     dialog: dialogApi,
     receive(channel: string, func: any) {
-        let validChannels = ["client/connections/status"]
+        const validChannels = ["client/connections/status"]
         if (validChannels.includes(channel)) {
-            ipcRenderer.on(channel, (_, ...args) => func(...args))
+            const handler = (_: never, ...args: never[]) => func(...args)
+            ipcRenderer.on(channel, handler)
+            return () => {
+                ipcRenderer.removeListener(channel, handler )
+            }
         }
     },
     removeAllListeners(channel: string) {
-        const validChannels = ["client/connections/status"]
-        if (validChannels.includes(channel)) {
-            ipcRenderer.removeAllListeners(channel)
-        }
+        // 不再使用 removeAllListeners，改用 removeListener 移除特定监听器
+        // 调用 receive 返回的 cleanup 函数即可
     },
 })

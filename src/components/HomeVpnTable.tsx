@@ -1,5 +1,5 @@
 import { Vpn, VPNDetail } from "@/api/vpn.ts"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Connections, { Status, StatusNotification } from "@/api/connections.ts"
 import Toast from "@/utils/toast.ts"
 import { useNavigate } from "react-router-dom"
@@ -26,9 +26,11 @@ function ActionCell({
     const [status, setStatus] = useState(Status.Stop)
     const [modalVisible, setModalVisible] = useState(false)
     const navigate = useNavigate()
+    
+    const statusRef = useRef<Status>(status)
 
     const doConnect = useCallback(async () => {
-        if (status === Status.Connecting) return
+        if (statusRef.current === Status.Connecting) return
         setStatus(Status.Connecting)
         try {
             const r = await Connections.connect(record.id)
@@ -37,7 +39,7 @@ function ActionCell({
         } catch (e: any) {
             Toast.error("连接失败", e.message)
         }
-    }, [status, record.id])
+    }, [record.id])
 
     const doDisconnect = useCallback(async () => {
         try {
@@ -58,8 +60,12 @@ function ActionCell({
             .catch((e: any) => {
                 Toast.error("删除失败", e.message)
             })
-    }, [record.id, onDelete])
+    }, [record, onDelete])
 
+    useEffect(() => {
+        statusRef.current = status
+    }, [status])
+    
     useEffect(() => {
         const func = (r: StatusNotification) => {
             if (r.current.id !== record.id) return
@@ -68,10 +74,8 @@ function ActionCell({
                 Toast.error("连接已断开")
             }
         }
-        Connections.receive(func).then()
-        return () => {
-            Connections.removeAllListeners().then()
-        }
+        const cleanup =  Connections.receive(func)
+        return () => cleanup()
     }, [record.id])
 
     useEffect(() => {
@@ -80,12 +84,12 @@ function ActionCell({
 
     useEffect(() => {
         const interval = setInterval(async () => {
-            if (autoReconnect && status === Status.Error) {
+            if (autoReconnect && statusRef.current === Status.Error) {
                 await doConnect()
             }
         }, 5 * 1000)
         return () => clearInterval(interval)
-    }, [status, autoReconnect, doConnect])
+    }, [statusRef, autoReconnect, doConnect])
 
     const getStatusTag = () => {
         switch (status) {
