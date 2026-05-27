@@ -18,6 +18,10 @@ export interface IConnections {
     showAdapters: () => Promise<Adapter[]>
 }
 
+export interface IDialog {
+    showOpenDialog: (options?: any) => Promise<string>
+}
+
 export interface IVpn {
     all: () => Promise<VPNDetail[]>
     get: (id: string) => Promise<VPNDetail>
@@ -29,6 +33,7 @@ export interface IVpn {
 export interface IElectronAPI {
     db: IDb
     connections: IConnections
+    dialog: IDialog
     receive: (channel: string, func: (...args) => void) => Promise<void>
     removeAllListeners: (channel: string) => Promise<void>
 }

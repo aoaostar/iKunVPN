@@ -11,12 +11,14 @@ export default class Vpn {
         return Db.data.vpn.find((v) => v.id === id)
     }
 
-    static async create(item: Omit<VPNSchema, "id">): Promise<any> {
-        Db.data.vpn.push({
+    static async create(item: Omit<VPNSchema, "id">): Promise<VPNSchema> {
+        const newItem = {
             ...item,
             id: nanoid(),
-        })
+        }
+        Db.data.vpn.push(newItem)
         await Db.write()
+        return newItem
     }
 
     static async update(id: string, item: Omit<VPNSchema, "id">) {

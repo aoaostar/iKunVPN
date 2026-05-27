@@ -31,20 +31,18 @@ export default function Create() {
             .catch((e) => {
                 Toast.error("创建失败", e.message)
             })
-    }, [])
+    }, [navigate])
     const handleCancel = useCallback(() => {
         navigate("/")
-    }, [])
+    }, [navigate])
 
     return (
-        <>
-            <VPNForm
-                title="新增"
-                data={data}
-                updateData={updateData}
-                handleSave={handleSave}
-                handleCancel={handleCancel}
-            ></VPNForm>
-        </>
+        <VPNForm
+            title="新增"
+            data={data}
+            updateData={updateData}
+            handleSave={handleSave}
+            handleCancel={handleCancel}
+        />
     )
 }

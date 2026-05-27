@@ -48,9 +48,15 @@ const connections = {
         return ipcRenderer.invoke("connections/deleteTap", guidOrName)
     },
 }
+const dialogApi = {
+    showOpenDialog(options?: any) {
+        return ipcRenderer.invoke("dialog/showOpenDialog", options)
+    },
+}
 contextBridge.exposeInMainWorld("electronAPI", {
     db: db,
     connections: connections,
+    dialog: dialogApi,
     receive(channel: string, func: any) {
         let validChannels = ["client/connections/status"]
         if (validChannels.includes(channel)) {

@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useState } from "react"
+
 import {
     Button,
     Card,
@@ -11,7 +13,6 @@ import {
     Tag,
     Typography,
 } from "@douyinfe/semi-ui"
-import { useCallback, useEffect, useState } from "react"
 import { Vpn, VPNDetail } from "@/api/vpn.ts"
 import HomeVpnTable from "@/components/HomeVpnTable.tsx"
 import { useNavigate } from "react-router-dom"
@@ -41,6 +42,16 @@ export default function Home() {
             Toast.error("获取网卡列表失败", e.message || e)
         }
     }, [])
+
+    useEffect(() => {
+        Vpn.all().then((data) => {
+            setVpnData(data)
+        })
+    }, [])
+
+    useEffect(() => {
+        loadTapList()
+    }, [loadTapList])
 
     const handleInstallTap = useCallback(async () => {
         setInstallingTap(true)
@@ -102,16 +113,6 @@ export default function Home() {
         }
     }, [loadTapList])
 
-    useEffect(() => {
-        Vpn.all().then((data) => {
-            setVpnData(data)
-        })
-    }, [])
-
-    useEffect(() => {
-        loadTapList()
-    }, [loadTapList])
-
     const handleDelete = useCallback(
         (vpnDetail: VPNDetail) => {
             setVpnData(vpnData.filter((v) => v.id !== vpnDetail.id))
@@ -152,7 +153,6 @@ export default function Home() {
 
     return (
         <Layout>
-            {/* 顶部导航栏 */}
             <Layout.Header
                 style={{
                     background: "#fff",
@@ -222,10 +222,7 @@ export default function Home() {
                                 />
                             )}
                         </Tabs.TabPane>
-                        <Tabs.TabPane
-                            tab="服务器列表"
-                            itemKey="1"
-                        >
+                        <Tabs.TabPane tab="服务器列表" itemKey="1">
                             <Space
                                 style={{
                                     margin: "1rem 0",
@@ -259,7 +256,7 @@ export default function Home() {
 
             <Modal
                 visible={showTapModal}
-                onClose={() => setShowTapModal(false)}
+                onCancel={() => setShowTapModal(false)}
                 onOk={handleCreateTap}
                 title="创建虚拟网卡"
                 okText="创建"

@@ -1,6 +1,8 @@
 import Vpn from "./db/vpn"
 import Connections from "./connections"
-import { ipcMain } from "electron"
+import { ipcMain, dialog } from "electron"
+import path from "path"
+import { RESOURCE_PATH } from "./const"
 
 export default function initIpcMain() {
     ipcMain.handle("db/vpn/all", async () => {
@@ -51,5 +53,14 @@ export default function initIpcMain() {
     })
     ipcMain.handle("connections/deleteTap", async (_, guidOrName: string) => {
         return await Connections.deleteTap(guidOrName)
+    })
+    ipcMain.handle("dialog/showOpenDialog", async (_, options?: any) => {
+        const result = await dialog.showOpenDialog({
+            properties: ["openFile"],
+            filters: [{ name: "Executable", extensions: ["exe"] }],
+            ...options,
+        })
+        if (result.canceled) return ""
+        return result.filePaths[0] || ""
     })
 }

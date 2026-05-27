@@ -1,3 +1,9 @@
+import { Vpn, VPNDetail } from "@/api/vpn.ts"
+import { useCallback, useEffect, useState } from "react"
+import Connections, { Status, StatusNotification } from "@/api/connections.ts"
+import Toast from "@/utils/toast.ts"
+import { useNavigate } from "react-router-dom"
+import Console from "@/components/Console.tsx"
 import {
     Button,
     Modal,
@@ -7,12 +13,6 @@ import {
     Tag,
     Typography,
 } from "@douyinfe/semi-ui"
-import { Vpn, VPNDetail } from "@/api/vpn.ts"
-import { useCallback, useEffect, useState } from "react"
-import Connections, { Status, StatusNotification } from "@/api/connections.ts"
-import Toast from "@/utils/toast.ts"
-import { useNavigate } from "react-router-dom"
-import Console from "@/components/Console.tsx"
 
 function ActionCell({
     record,
@@ -114,7 +114,7 @@ function ActionCell({
                 </Space>
 
                 {/* 右侧：操作按钮 */}
-                <Space size="small">
+                <Space>
                     {status === Status.Success && (
                         <Button
                             size="small"

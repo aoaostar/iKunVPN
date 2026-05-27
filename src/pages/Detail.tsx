@@ -22,42 +22,46 @@ export default function Detail() {
         username: "",
     })
 
-    const { id } = useParams<{ id: string }>()
-    if (!id) {
-        return <div>id 不得为空</div>
-    }
-    useEffect(() => {
-        Vpn.get(id).then((resp) => {
-            updateData(resp)
-        })
-    }, [])
     const navigate = useNavigate()
 
-    const handleSave = useCallback((item: VPNDetail) => {
-        console.log(item)
-        Vpn.update(item.id, item)
-            .then(() => {
-                Toast.success("保存成功")
-                navigate("/")
-            })
-            .catch((e) => {
-                Toast.error("保存失败", e.message)
-            })
-    }, [])
+    const handleSave = useCallback(
+        (item: VPNDetail) => {
+            Vpn.update(item.id, item)
+                .then(() => {
+                    Toast.success("保存成功")
+                    navigate("/")
+                })
+                .catch((e) => {
+                    Toast.error("保存失败", e.message)
+                })
+        },
+        [navigate]
+    )
 
     const handleCancel = useCallback(() => {
         navigate("/")
-    }, [])
+    }, [navigate])
+
+    const { id } = useParams<{ id: string }>()
+    useEffect(() => {
+        if (typeof id === "string") {
+            Vpn.get(id).then((resp) => {
+                updateData(resp)
+            })
+        }
+    }, [id, updateData])
+
+    if (!id) {
+        return <div>id 不得为空</div>
+    }
 
     return (
-        <>
-            <VPNForm
-                title="修改"
-                data={data}
-                updateData={updateData}
-                handleSave={handleSave}
-                handleCancel={handleCancel}
-            ></VPNForm>
-        </>
+        <VPNForm
+            title="修改"
+            data={data}
+            updateData={updateData as any}
+            handleSave={handleSave as any}
+            handleCancel={handleCancel}
+        />
     )
 }
