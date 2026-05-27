@@ -85,134 +85,6 @@ export default class Connection {
             current: this.vpnSchema,
         })
     }
-
-    // public async connect(): Promise<StatusResponse> {
-    //     return new Promise(
-    //         async (
-    //             resolve: (value: StatusResponse) => void,
-    //             reject: (value: StatusResponse) => void
-    //         ) => {
-    //             let password = this.vpnSchema.password
-    //             if (this.vpnSchema.otp_config.secret) {
-    //                 const otp = new OTP({
-    //                     secret: this.vpnSchema.otp_config.secret,
-    //                     timeSlice: this.vpnSchema.otp_config.step,
-    //                     keySize: 6,
-    //                 })
-    //                 password += otp.totp(Date.now())
-    //             }
-    //             const directoryPath = path.dirname(this.ovpn_file)
-    //             await this.kill()
-    //
-    //             this.sendStatus(Status.Connecting)
-    //
-    //             try {
-    //                 await fsPromises.access(directoryPath)
-    //             } catch (err: any) {
-    //                 if (err.code === "ENOENT") {
-    //                     await fsPromises.mkdir(directoryPath, {
-    //                         recursive: true,
-    //                     })
-    //                 }
-    //             }
-    //             await fsPromises.writeFile(this.ovpn_file, this.vpnSchema.ovpn)
-    //             await fsPromises.writeFile(
-    //                 this.credentials_file,
-    //                 `${this.vpnSchema.username}\n${password}`
-    //             )
-    //             try {
-    //                 const command_args = [
-    //                     "--config",
-    //                     path.relative(this.cwd_path, this.ovpn_file),
-    //                     "--auth-user-pass",
-    //                     path.relative(this.cwd_path, this.credentials_file),
-    //                     "--auth-nocache",
-    //                     "--ping",
-    //                     "10",
-    //                     "--ping-exit",
-    //                     "120",
-    //                     "--remap-usr1",
-    //                     "SIGTERM",
-    //                     "--auth-retry",
-    //                     "nointeract",
-    //                     ...(this.vpnSchema.config.adapter
-    //                         ? ["--dev-node", this.vpnSchema.config.adapter]
-    //                         : []),
-    //                 ]
-    //
-    //                 this.log.info(
-    //                     `启动连接: ${this.executable} ${command_args.join(" ")}`
-    //                 )
-    //                 this.process = spawn(this.executable, command_args, {
-    //                     cwd: this.cwd_path,
-    //                 })
-    //             } catch (e) {
-    //                 this.log.info(`启动失败: ${e}`)
-    //                 this.sendStatus(Status.Stop)
-    //                 reject({
-    //                     status: Status.Stop,
-    //                     message: "连接失败",
-    //                 })
-    //                 return
-    //             }
-    //
-    //             this.process.stdout.on("data", (message: Buffer) => {
-    //                 const messageStr = message.toString()
-    //                 this.log.info(messageStr)
-    //                 if (
-    //                     messageStr.includes(
-    //                         "Initialization Sequence Completed With Errors"
-    //                     )
-    //                 ) {
-    //                     this.kill()
-    //                     reject({
-    //                         status: Status.Stop,
-    //                         message: "连接失败",
-    //                     })
-    //                     return
-    //                 }
-    //                 if (
-    //                     messageStr.includes("Initialization Sequence Completed")
-    //                 ) {
-    //                     this.sendStatus(Status.Success)
-    //                     resolve({
-    //                         status: Status.Success,
-    //                         message: "连接成功",
-    //                     })
-    //                 }
-    //                 for (const message of ["TLS: soft reset"]) {
-    //                     if (messageStr.includes(message)) {
-    //                         this.kill()
-    //                         return
-    //                     }
-    //                 }
-    //             })
-    //
-    //             this.process.stderr.on("data", (message: Buffer) => {
-    //                 this.log.error(message.toString())
-    //             })
-    //
-    //             this.process.on("exit", (code, signal) => {
-    //                 this.log.warn(`进程退出，退出码: ${code} signal: ${signal}`)
-    //                 if (this.__status !== Status.Stop) {
-    //                     this.sendStatus(Status.Error)
-    //                 }
-    //                 reject({
-    //                     status: Status.Error,
-    //                     message: "连接已断开",
-    //                 })
-    //             })
-    //             this.process.on("error", (err) => {
-    //                 this.log.error(`子进程出错: ${err}`)
-    //                 this.sendStatus(Status.Error)
-    //                 reject({
-    //                     status: Status.Error,
-    //                     message: "连接已断开",
-    //                 })
-    //             })
-    //         }
-    //     )
-    // }
     public async connect(): Promise<StatusResponse> {
         let password = this.vpnSchema.password
 
@@ -246,6 +118,10 @@ export default class Connection {
 
         return new Promise((resolve, reject) => {
             try {
+                let adapter = this.vpnSchema.config.adapter.trim()
+                if (adapter == "本地连接") {
+                    adapter = ""
+                }
                 const command_args = [
                     "--config",
                     path.relative(this.cwd_path, this.ovpn_file),
@@ -260,9 +136,7 @@ export default class Connection {
                     "SIGTERM",
                     "--auth-retry",
                     "nointeract",
-                    ...(this.vpnSchema.config.adapter
-                        ? ["--dev-node", this.vpnSchema.config.adapter]
-                        : []),
+                    ...(adapter ? ["--dev-node", adapter] : []),
                 ]
 
                 this.log.info(

@@ -25,7 +25,9 @@ const { Text } = Typography
 
 export default function Home() {
     const [vpnData, setVpnData] = useState<VPNDetail[]>([])
-    const [autoReconnect, setAutoReconnect] = useState(false)
+    const [autoReconnect, setAutoReconnect] = useState(
+        () => localStorage.getItem("autoReconnect") === "true"
+    )
     const [installingTap, setInstallingTap] = useState(false)
     const [uninstallingTap, setUninstallingTap] = useState(false)
     const [tapInstalled, setTapInstalled] = useState(false)
@@ -270,9 +272,11 @@ export default function Home() {
                             >
                                 <Checkbox
                                     checked={autoReconnect}
-                                    onChange={() =>
-                                        setAutoReconnect(!autoReconnect)
-                                    }
+                                    onChange={() => {
+                                        const val = !autoReconnect
+                                        setAutoReconnect(val)
+                                        localStorage.setItem("autoReconnect", String(val))
+                                    }}
                                 >
                                     自动重连
                                 </Checkbox>

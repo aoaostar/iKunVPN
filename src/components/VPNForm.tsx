@@ -213,12 +213,10 @@ export default function VPNForm({
                     <div style={{ marginBottom: 24 }}>
                         <div style={{ marginBottom: 8, fontWeight: 500 }}>网卡</div>
                         <Select
-                            placeholder="留空使用默认网卡"
-                            value={(formValues as any).config?.adapter}
+                            value={(formValues as any).config?.adapter || "本地连接"}
                             onChange={(val: any) => updateNested("config", "adapter", val)}
                             style={{ width: '100%' }}
                         >
-                            <Select.Option value="">默认网卡</Select.Option>
                             {tapList.map((tap) => (
                                 <Select.Option key={tap.guid} value={tap.name}>{tap.name}</Select.Option>
                             ))}
