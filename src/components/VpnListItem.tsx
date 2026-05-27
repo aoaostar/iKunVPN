@@ -58,7 +58,7 @@ export default function VpnListItem({
         statusRef.current = Status.Connecting
         setStatus(Status.Connecting)
         try {
-            const r = await Connections.disconnect(vpnDetail.id)
+            await Connections.disconnect(vpnDetail.id)
             statusRef.current = Status.Stop
             setStatus(Status.Stop)
             Toast.success("操作成功")

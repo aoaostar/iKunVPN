@@ -2,7 +2,7 @@
   "name": "ikun-vpn",
   "private": true,
   "main": "build/electron/main.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder --config",

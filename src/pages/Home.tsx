@@ -169,7 +169,6 @@ export default function Home() {
             key: "action",
             render: (_: any, record: Adapter) => (
                 <Button
-                    type="secondary"
                     size="small"
                     type="danger"
                     onClick={() => handleDeleteTap(record.guid!)}
