@@ -52,8 +52,5 @@ export const Connections = {
     receive: (func: (data: StatusNotification) => void) => {
         return window.electronAPI.receive("client/connections/status", (...args: unknown[]) => func(args[0] as StatusNotification))
     },
-    removeAllListeners: async () => {
-        // 不再使用全局移除，由各组件自行管理监听器生命周期
-    },
 }
 export default Connections

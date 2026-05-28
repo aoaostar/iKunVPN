@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron"
+// @ts-ignore
 import log from "electron-log/preload"
 
 Object.assign(console, log.functions)
@@ -66,16 +67,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     receive(channel: string, func: any) {
         const validChannels = ["client/connections/status"]
         if (validChannels.includes(channel)) {
-            const handler = (_: never, ...args: never[]) => func(...args)
+            const handler = (_: unknown, ...args: unknown[]) => func(...args)
             ipcRenderer.on(channel, handler)
             return () => {
                 ipcRenderer.removeListener(channel, handler )
             }
         }
-    },
-    removeAllListeners(channel: string) {
-        // 不再使用 removeAllListeners，改用 removeListener 移除特定监听器
-        // 调用 receive 返回的 cleanup 函数即可
     },
 })
 
