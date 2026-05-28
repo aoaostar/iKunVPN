@@ -25,7 +25,9 @@ jobs:
           node-version: "20"
 
       - name: Install Dependencies
-        run: npm install
+        run: |
+          del .npmrc
+          npm install
 
       - name: Build Electron App
         run: npm run build
