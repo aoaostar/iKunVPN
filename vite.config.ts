@@ -2,8 +2,7 @@ import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import * as path from "path"
 import electron from "vite-plugin-electron/simple"
-
-const isProduction = !Boolean(process.env.VITE_DEV_SERVER_URL)
+const isProduction = !process.env.VITE_DEV_SERVER_URL
 
 export default defineConfig({
     plugins: [

@@ -42,8 +42,8 @@ export default function Home() {
         try {
             const list = await Connections.listTaps()
             setTapList(list)
-        } catch (e: any) {
-            Toast.error("获取网卡列表失败", e.message || e)
+        } catch (e: unknown) {
+            Toast.error("获取网卡列表失败", e instanceof Error ? e.message : String(e))
         }
     }, [])
 
@@ -51,7 +51,7 @@ export default function Home() {
         try {
             const installed = await Connections.checkTapInstalled()
             setTapInstalled(installed)
-        } catch (e: any) {
+        } catch (e: unknown) {
             setTapInstalled(false)
         }
     }, [])
@@ -74,8 +74,8 @@ export default function Home() {
             Toast.success("TAP 驱动安装成功")
             loadTapList()
             loadTapStatus()
-        } catch (e: any) {
-            Toast.error("TAP 驱动安装失败", e.message || e)
+        } catch (e: unknown) {
+            Toast.error("TAP 驱动安装失败", e instanceof Error ? e.message : String(e))
         } finally {
             setInstallingTap(false)
         }
@@ -88,8 +88,8 @@ export default function Home() {
             Toast.success("TAP 驱动卸载成功")
             loadTapList()
             loadTapStatus()
-        } catch (e: any) {
-            Toast.error("TAP 驱动卸载失败", e.message || e)
+        } catch (e: unknown) {
+            Toast.error("TAP 驱动卸载失败", e instanceof Error ? e.message : String(e))
         } finally {
             setUninstallingTap(false)
         }
@@ -107,8 +107,8 @@ export default function Home() {
             setNewTapName("")
             setShowTapModal(false)
             loadTapList()
-        } catch (e: any) {
-            Toast.error("网卡创建失败", e.message || e)
+        } catch (e: unknown) {
+            Toast.error("网卡创建失败", e instanceof Error ? e.message : String(e))
         } finally {
             Toast.close(toastId)
         }
@@ -121,8 +121,8 @@ export default function Home() {
                 await Connections.deleteTap(guid)
                 Toast.success("网卡已删除")
                 loadTapList()
-            } catch (e: any) {
-                Toast.error("网卡删除失败", e.message || e)
+        } catch (e: unknown) {
+            Toast.error("网卡删除失败", e instanceof Error ? e.message : String(e))
             } finally {
                 Toast.close(toastId)
             }
@@ -135,8 +135,8 @@ export default function Home() {
         try {
             await loadTapList()
             Toast.success("刷新成功")
-        } catch (e: any) {
-            Toast.error("刷新失败", e.message || e)
+        } catch (e: unknown) {
+            Toast.error("刷新失败", e instanceof Error ? e.message : String(e))
         } finally {
             setRefreshing(false)
         }
@@ -167,7 +167,7 @@ export default function Home() {
         {
             title: "操作",
             key: "action",
-            render: (_: any, record: Adapter) => (
+            render: (_: unknown, record: Adapter) => (
                 <Button
                     size="small"
                     type="danger"

@@ -83,7 +83,6 @@ export default class Connections {
             const [name, id, type] = adapter_trim_str.split(" ")
             adapters.push({
                 name: name.slice(1, -1),
-                id,
                 type,
                 guid: id,
             })

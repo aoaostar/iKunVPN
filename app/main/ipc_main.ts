@@ -1,8 +1,6 @@
 import Vpn from "./db/vpn"
 import Connections from "./connections"
 import { ipcMain, dialog } from "electron"
-import path from "path"
-import { RESOURCE_PATH } from "./const"
 
 export default function initIpcMain() {
     ipcMain.handle("db/vpn/all", async () => {

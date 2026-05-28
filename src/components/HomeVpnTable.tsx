@@ -36,8 +36,8 @@ function ActionCell({
             const r = await Connections.connect(record.id)
             setStatus(r.status)
             Toast.success("连接成功")
-        } catch (e: any) {
-            Toast.error("连接失败", e.message)
+        } catch (e: unknown) {
+            Toast.error("连接失败", e instanceof Error ? e.message : String(e))
         }
     }, [record.id])
 
@@ -46,8 +46,8 @@ function ActionCell({
             const r = await Connections.disconnect(record.id)
             setStatus(r.status)
             Toast.success("操作成功")
-        } catch (e: any) {
-            Toast.error("操作失败", e.message)
+        } catch (e: unknown) {
+            Toast.error("操作失败", e instanceof Error ? e.message : String(e))
         }
     }, [record.id])
 
@@ -57,8 +57,8 @@ function ActionCell({
                 onDelete(record)
                 Toast.success("删除成功")
             })
-            .catch((e: any) => {
-                Toast.error("删除失败", e.message)
+            .catch((e: unknown) => {
+                Toast.error("删除失败", e instanceof Error ? e.message : String(e))
             })
     }, [record, onDelete])
 

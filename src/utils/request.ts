@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios, { type AxiosResponse, type AxiosError } from "axios"
 import Toast from "./toast.ts"
 
 const request = axios.create({
@@ -7,7 +7,7 @@ const request = axios.create({
 })
 
 request.interceptors.response.use(
-    function (response: any) {
+    function (response: AxiosResponse) {
         let data = response.data
 
         if (data.status !== "ok") {
@@ -15,7 +15,7 @@ request.interceptors.response.use(
         }
         return data.data
     },
-    function (error: any) {
+    function (error: AxiosError) {
         Toast.error("失败", error.message)
         return Promise.reject(error)
     }

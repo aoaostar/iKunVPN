@@ -2,6 +2,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useCallback, useEffect } from "react"
 import { useImmer } from "use-immer"
 import Vpn, { VPNDetail } from "@/api/vpn.ts"
+import type { FormValues } from "@/components/VPNForm.tsx"
 import Toast from "@/utils/toast.ts"
 import VPNForm from "@/components/VPNForm.tsx"
 
@@ -25,14 +26,14 @@ export default function Detail() {
     const navigate = useNavigate()
 
     const handleSave = useCallback(
-        (item: VPNDetail) => {
-            Vpn.update(item.id, item)
+        (item: FormValues) => {
+            Vpn.update((item as VPNDetail).id, item as VPNDetail)
                 .then(() => {
                     Toast.success("保存成功")
                     navigate("/")
                 })
-                .catch((e) => {
-                    Toast.error("保存失败", e.message)
+                .catch((e: unknown) => {
+                    Toast.error("保存失败", e instanceof Error ? e.message : String(e))
                 })
         },
         [navigate]
@@ -59,8 +60,8 @@ export default function Detail() {
         <VPNForm
             title="修改"
             data={data}
-            updateData={updateData as any}
-            handleSave={handleSave as any}
+            updateData={updateData as import("use-immer").Updater<FormValues>}
+            handleSave={(item: FormValues) => handleSave(item)}
             handleCancel={handleCancel}
         />
     )

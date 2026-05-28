@@ -17,11 +17,13 @@ import Toast from "@/utils/toast.ts"
 
 const { Text, Title } = Typography
 
+export type FormValues = VPNDetail | VpnCreate
+
 type Props = {
     title: string
-    data: VPNDetail | VpnCreate
-    updateData: Updater<VPNDetail | VpnCreate>
-    handleSave: (item: VPNDetail | VpnCreate) => void
+    data: FormValues
+    updateData: Updater<FormValues>
+    handleSave: (item: FormValues) => void
     handleCancel: () => void
 }
 
@@ -34,16 +36,16 @@ export default function VPNForm({
 }: Props) {
     const [ovpnFilename, setOvpnFilename] = useState("")
     const [tapList, setTapList] = useState<Adapter[]>([])
-    const [formValues, setFormValues] = useState(data)
-    const [executablePath, setExecutablePath] = useState((data as any).config?.executable || "")
+    const [formValues, setFormValues] = useState<FormValues>(data as FormValues)
+    const [executablePath, setExecutablePath] = useState((data as { config?: { executable?: string } }).config?.executable || "")
     const contentRef = useRef<HTMLDivElement>(null)
 
     const loadTapList = useCallback(async () => {
         try {
             const list = await Connections.listTaps()
             setTapList(list)
-        } catch (e: any) {
-            Toast.error("获取网卡列表失败", e.message || e)
+        } catch (e: unknown) {
+            Toast.error("获取网卡列表失败", e instanceof Error ? e.message : String(e))
         }
     }, [])
 
@@ -56,30 +58,38 @@ export default function VPNForm({
         if ((data as VPNDetail).id) {
             setOvpnFilename("")
         }
-        setExecutablePath((data as any).config?.executable || "")
+        setExecutablePath((data as { config?: { executable?: string } }).config?.executable || "")
     }, [data])
 
-    const updateField = <K extends keyof (VPNDetail | VpnCreate)>(key: K, value: (VPNDetail | VpnCreate)[K]) => {
+    const updateField = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
         updateData((draft) => {
-            ;(draft as any)[key] = value
+            (draft as Record<string, unknown>)[String(key)] = value
         })
         setFormValues((draft) => {
-            return { ...draft, [key]: value } as VPNDetail | VpnCreate
+            return { ...draft, [key]: value } as FormValues
         })
     }
 
-    const updateNested = <K extends keyof (VPNDetail | VpnCreate), PK extends keyof (VPNDetail | VpnCreate)[K]>(parent: K, child: PK, value: any) => {
+    const updateNested = <K extends keyof FormValues, PK extends keyof FormValues[K]>(parent: K, child: PK, value: unknown) => {
         updateData((draft) => {
-            ;(draft as any)[parent][child] = value
+            const draftObj = draft as Record<string, unknown>
+            const parentKey = String(parent)
+            const childKey = String(child)
+            const parentObj = draftObj[parentKey] as Record<string, unknown> || {}
+            parentObj[childKey] = value
         })
         setFormValues((draft) => {
+            const draftObj = draft as Record<string, unknown>
+            const parentKey = String(parent)
+            const childKey = String(child)
+            const parentObj = draftObj[parentKey] as Record<string, unknown> || {}
             return {
                 ...draft,
-                [(parent as string)]: {
-                    ...((draft as any)[parent]),
-                    [(child as string)]: value,
+                [parentKey]: {
+                    ...parentObj,
+                    [childKey]: value,
                 },
-            } as VPNDetail | VpnCreate
+            } as FormValues
         })
     }
 
@@ -90,8 +100,8 @@ export default function VPNForm({
                 setExecutablePath(filePath)
                 updateNested("config", "executable", filePath)
             }
-        } catch (e: any) {
-            Toast.error("选择文件失败", e.message || e)
+        } catch (e: unknown) {
+            Toast.error("选择文件失败", e instanceof Error ? e.message : String(e))
         }
     }
 
@@ -108,8 +118,8 @@ export default function VPNForm({
                         <div style={{ marginBottom: 8, fontWeight: 500 }}>备注 <span style={{ color: "red" }}>*</span></div>
                         <Input
                             placeholder="请输入备注"
-                            value={(formValues as any).mark}
-                            onChange={(val: string) => updateField("mark", val)}
+            value={(formValues as FormValues & { mark?: string }).mark}
+            onChange={(val: string) => updateField("mark", val)}
                             style={{ width: '100%' }}
                         />
                     </div>
@@ -117,8 +127,8 @@ export default function VPNForm({
                         <div style={{ marginBottom: 8, fontWeight: 500 }}>用户名 <span style={{ color: "red" }}>*</span></div>
                         <Input
                             placeholder="请输入用户名"
-                            value={(formValues as any).username}
-                            onChange={(val: string) => updateField("username", val)}
+            value={(formValues as FormValues & { username?: string }).username}
+            onChange={(val: string) => updateField("username", val)}
                             style={{ width: '100%' }}
                         />
                     </div>
@@ -127,8 +137,8 @@ export default function VPNForm({
                         <Input
                             type="password"
                             placeholder="请输入密码"
-                            value={(formValues as any).password}
-                            onChange={(val: string) => updateField("password", val)}
+            value={(formValues as FormValues & { password?: string }).password}
+            onChange={(val: string) => updateField("password", val)}
                             style={{ width: '100%' }}
                         />
                     </div>
@@ -145,11 +155,12 @@ export default function VPNForm({
                                     const input = document.createElement('input')
                                     input.type = 'file'
                                     input.accept = '.ovpn'
-                                    input.onchange = (e: any) => {
-                                        if (e.target.files && e.target.files[0]) {
-                                            const file = e.target.files[0]
+                                    input.onchange = (e: Event) => {
+                                        const target = (e.target as HTMLInputElement).files
+                                        if (target && target[0]) {
+                                            const file = target[0]
                                             file.text().then((r: string) => {
-                                                const filename: string = "path" in file ? (file as any).path : file.name
+                                                const filename: string = "path" in file ? (file as unknown as { path: string }).path : file.name
                                                 setOvpnFilename(filename)
                                                 updateField("ovpn", r)
                                             })
@@ -162,7 +173,7 @@ export default function VPNForm({
                             <TextArea
                                 placeholder="粘贴OpenVPN配置内容"
                                 rows={10}
-                                value={(formValues as any).ovpn}
+                                value={(formValues as FormValues & { ovpn?: string }).ovpn}
                                 onChange={(val: string) => updateField("ovpn", val)}
                             />
                         </Space>
@@ -176,7 +187,7 @@ export default function VPNForm({
                         <div style={{ marginBottom: 8, fontWeight: 500 }}>OTP Secret</div>
                         <Input
                             placeholder="动态口令密钥"
-                            value={(formValues as any).otp_config?.secret}
+                            value={(formValues as FormValues & { otp_config?: { secret?: string } }).otp_config?.secret}
                             onChange={(val: string) => updateNested("otp_config", "secret", val)}
                             style={{ width: '100%' }}
                         />
@@ -185,8 +196,8 @@ export default function VPNForm({
                         <div style={{ marginBottom: 8, fontWeight: 500 }}>OTP Step</div>
                         <InputNumber
                             min={0}
-                            value={(formValues as any).otp_config?.step}
-                            onChange={(val: any) => updateNested("otp_config", "step", Number(val))}
+                            value={(formValues as FormValues & { otp_config?: { step?: number } }).otp_config?.step}
+                            onChange={(val: unknown) => updateNested("otp_config", "step", Number(val))}
                             style={{ width: '100%' }}
                         />
                     </div>
@@ -213,8 +224,8 @@ export default function VPNForm({
                     <div style={{ marginBottom: 24 }}>
                         <div style={{ marginBottom: 8, fontWeight: 500 }}>网卡</div>
                         <Select
-                            value={(formValues as any).config?.adapter || "本地连接"}
-                            onChange={(val: any) => updateNested("config", "adapter", val)}
+                            value={(formValues as FormValues & { config?: { adapter?: string } }).config?.adapter || "本地连接"}
+                            onChange={(val: unknown) => updateNested("config", "adapter", val)}
                             style={{ width: '100%' }}
                         >
                             {tapList.map((tap) => (

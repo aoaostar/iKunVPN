@@ -20,7 +20,7 @@ export interface IConnections {
 }
 
 export interface IDialog {
-    showOpenDialog: (options?: any) => Promise<string>
+    showOpenDialog: (options?: Electron.OpenDialogOptions) => Promise<string>
 }
 
 export interface IVpn {
@@ -35,13 +35,13 @@ export interface IElectronAPI {
     db: IDb
     connections: IConnections
     dialog: IDialog
-    receive: (channel: string, func: (...args) => void) => ()=>void
+    receive: (channel: string, func: (...args: unknown[]) => void) => ()=>void
     removeAllListeners: (channel: string) => Promise<void>
 }
 
 declare global {
     interface Window {
-        require: (package_name: string) => any
+        require: (package_name: string) => unknown
         electronAPI: IElectronAPI
     }
 }

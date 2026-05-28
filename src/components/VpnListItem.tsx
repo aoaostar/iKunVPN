@@ -47,10 +47,10 @@ export default function VpnListItem({
                 setStatus(Status.Success)
                 Toast.success("连接成功")
             }
-        } catch (e: any) {
+        } catch (e: unknown) {
             statusRef.current = Status.Error
             setStatus(Status.Error)
-            Toast.error("连接失败", e.message)
+            Toast.error("连接失败", e instanceof Error ? e.message : String(e))
         }
     }, [vpnDetail.id])
 
@@ -62,21 +62,21 @@ export default function VpnListItem({
             statusRef.current = Status.Stop
             setStatus(Status.Stop)
             Toast.success("操作成功")
-        } catch (e: any) {
+        } catch (e: unknown) {
             statusRef.current = Status.Error
             setStatus(Status.Error)
-            Toast.error("操作失败", e.message)
+            Toast.error("操作失败", e instanceof Error ? e.message : String(e))
         }
     }, [vpnDetail.id])
 
     const handleDelete = useCallback(() => {
         Vpn.delete(vpnDetail.id)
-            .then((_ : any) => {
+            .then((_ : unknown) => {
                 ParentHandleDelete(vpnDetail)
                 Toast.success("删除成功", "")
             })
-            .catch((e: any) => {
-                Toast.error("删除失败", e.message)
+            .catch((e: unknown) => {
+                Toast.error("删除失败", e instanceof Error ? e.message : String(e))
             })
     }, [vpnDetail.id, ParentHandleDelete])
 
