@@ -106,75 +106,164 @@ export default function VPNForm({
     }
 
     return (
-        <div style={{ height: 'calc(100vh - 60px)', display: 'flex', flexDirection: 'column' }}>
-            <Card style={{ flex: 1, marginBottom: 0, borderRadius: 0, borderLeft: 'none', borderRight: 'none', borderTop: 'none', display: 'flex', flexDirection: 'column' }} title={title} bodyStyle={{ padding: '16px 24px', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div
-                    ref={contentRef}
-                    style={{ flex: 1, overflowY: 'auto' }}
-                >
+        <div
+            style={{
+                height: "calc(100vh - 60px)",
+                display: "flex",
+                flexDirection: "column",
+            }}
+        >
+            <Card
+                style={{
+                    flex: 1,
+                    marginBottom: 0,
+                    borderRadius: 0,
+                    borderLeft: "none",
+                    borderRight: "none",
+                    borderTop: "none",
+                    display: "flex",
+                    flexDirection: "column",
+                }}
+                title={title}
+                bodyStyle={{
+                    padding: "16px 24px",
+                    flex: 1,
+                    overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                }}
+            >
+                <div ref={contentRef} style={{ flex: 1, overflowY: "auto" }}>
                     {/* 基本信息 */}
-                    <Title heading={5} type="primary" style={{ marginTop: 0, marginBottom: 16 }}>基本信息</Title>
+                    <Title
+                        heading={5}
+                        type="primary"
+                        style={{ marginTop: 0, marginBottom: 16 }}
+                    >
+                        基本信息
+                    </Title>
                     <div style={{ marginBottom: 16 }}>
-                        <div style={{ marginBottom: 8, fontWeight: 500 }}>备注 <span style={{ color: "red" }}>*</span></div>
+                        <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                            备注 <span style={{ color: "red" }}>*</span>
+                        </div>
                         <Input
                             placeholder="请输入备注"
-            value={(formValues as FormValues & { mark?: string }).mark}
-            onChange={(val: string) => updateField("mark", val)}
-                            style={{ width: '100%' }}
+                            value={
+                                (formValues as FormValues & { mark?: string })
+                                    .mark
+                            }
+                            onChange={(val: string) => updateField("mark", val)}
+                            style={{ width: "100%" }}
                         />
                     </div>
                     <div style={{ marginBottom: 16 }}>
-                        <div style={{ marginBottom: 8, fontWeight: 500 }}>用户名 <span style={{ color: "red" }}>*</span></div>
+                        <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                            用户名 <span style={{ color: "red" }}>*</span>
+                        </div>
                         <Input
                             placeholder="请输入用户名"
-            value={(formValues as FormValues & { username?: string }).username}
-            onChange={(val: string) => updateField("username", val)}
-                            style={{ width: '100%' }}
+                            value={
+                                (
+                                    formValues as FormValues & {
+                                        username?: string
+                                    }
+                                ).username
+                            }
+                            onChange={(val: string) =>
+                                updateField("username", val)
+                            }
+                            style={{ width: "100%" }}
                         />
                     </div>
                     <div style={{ marginBottom: 16 }}>
-                        <div style={{ marginBottom: 8, fontWeight: 500 }}>密码 <span style={{ color: "red" }}>*</span></div>
+                        <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                            密码 <span style={{ color: "red" }}>*</span>
+                        </div>
                         <Input
-                            type="password"
+                            mode="password"
                             placeholder="请输入密码"
-            value={(formValues as FormValues & { password?: string }).password}
-            onChange={(val: string) => updateField("password", val)}
-                            style={{ width: '100%' }}
+                            value={
+                                (
+                                    formValues as FormValues & {
+                                        password?: string
+                                    }
+                                ).password
+                            }
+                            onChange={(val: string) =>
+                                updateField("password", val)
+                            }
+                            style={{ width: "100%" }}
                         />
                     </div>
 
                     <div style={{ height: 16 }} />
 
                     {/* 配置文件 */}
-                    <Title heading={5} type="primary" style={{ marginBottom: 16 }}>配置文件</Title>
+                    <Title
+                        heading={5}
+                        type="primary"
+                        style={{ marginBottom: 16 }}
+                    >
+                        配置文件
+                    </Title>
                     <div style={{ marginBottom: 16 }}>
-                        <div style={{ marginBottom: 8, fontWeight: 500 }}>.ovpn文件</div>
-                        <Space vertical align="start" style={{ width: '100%' }}>
+                        <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                            .ovpn文件
+                        </div>
+                        <Space vertical align="start" style={{ width: "100%" }}>
                             <Space>
-                                <Button type="secondary" theme="outline" onClick={() => {
-                                    const input = document.createElement('input')
-                                    input.type = 'file'
-                                    input.accept = '.ovpn'
-                                    input.onchange = (e: Event) => {
-                                        const target = (e.target as HTMLInputElement).files
-                                        if (target && target[0]) {
-                                            const file = target[0]
-                                            file.text().then((r: string) => {
-                                                const filename: string = "path" in file ? (file as unknown as { path: string }).path : file.name
-                                                setOvpnFilename(filename)
-                                                updateField("ovpn", r)
-                                            })
+                                <Button
+                                    type="secondary"
+                                    theme="outline"
+                                    onClick={() => {
+                                        const input =
+                                            document.createElement("input")
+                                        input.type = "file"
+                                        input.accept = ".ovpn"
+                                        input.onchange = (e: Event) => {
+                                            const target = (
+                                                e.target as HTMLInputElement
+                                            ).files
+                                            if (target && target[0]) {
+                                                const file = target[0]
+                                                file.text().then(
+                                                    (r: string) => {
+                                                        const filename: string =
+                                                            "path" in file
+                                                                ? (
+                                                                      file as unknown as {
+                                                                          path: string
+                                                                      }
+                                                                  ).path
+                                                                : file.name
+                                                        setOvpnFilename(
+                                                            filename
+                                                        )
+                                                        updateField("ovpn", r)
+                                                    }
+                                                )
+                                            }
                                         }
-                                    }
-                                    input.click()
-                                }}>选择文件</Button>
+                                        input.click()
+                                    }}
+                                >
+                                    选择文件
+                                </Button>
                                 <Text type="tertiary">{ovpnFilename}</Text>
                             </Space>
                             <TextArea
                                 placeholder="粘贴OpenVPN配置内容"
                                 rows={10}
-                                value={(formValues as FormValues & { ovpn?: string }).ovpn}
-                                onChange={(val: string) => updateField("ovpn", val)}
+                                value={
+                                    (
+                                        formValues as FormValues & {
+                                            ovpn?: string
+                                        }
+                                    ).ovpn
+                                }
+                                onChange={(val: string) =>
+                                    updateField("ovpn", val)
+                                }
                             />
                         </Space>
                     </div>
@@ -182,32 +271,66 @@ export default function VPNForm({
                     <div style={{ height: 16 }} />
 
                     {/* OTP设置 */}
-                    <Title heading={5} type="primary" style={{ marginBottom: 16 }}>OTP设置（可选）</Title>
+                    <Title
+                        heading={5}
+                        type="primary"
+                        style={{ marginBottom: 16 }}
+                    >
+                        OTP设置（可选）
+                    </Title>
                     <div style={{ marginBottom: 16 }}>
-                        <div style={{ marginBottom: 8, fontWeight: 500 }}>OTP Secret</div>
+                        <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                            OTP Secret
+                        </div>
                         <Input
                             placeholder="动态口令密钥"
-                            value={(formValues as FormValues & { otp_config?: { secret?: string } }).otp_config?.secret}
-                            onChange={(val: string) => updateNested("otp_config", "secret", val)}
-                            style={{ width: '100%' }}
+                            value={
+                                (
+                                    formValues as FormValues & {
+                                        otp_config?: { secret?: string }
+                                    }
+                                ).otp_config?.secret
+                            }
+                            onChange={(val: string) =>
+                                updateNested("otp_config", "secret", val)
+                            }
+                            style={{ width: "100%" }}
                         />
                     </div>
                     <div style={{ marginBottom: 16 }}>
-                        <div style={{ marginBottom: 8, fontWeight: 500 }}>OTP Step</div>
+                        <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                            OTP Step
+                        </div>
                         <InputNumber
                             min={0}
-                            value={(formValues as FormValues & { otp_config?: { step?: number } }).otp_config?.step}
-                            onChange={(val: unknown) => updateNested("otp_config", "step", Number(val))}
-                            style={{ width: '100%' }}
+                            value={
+                                (
+                                    formValues as FormValues & {
+                                        otp_config?: { step?: number }
+                                    }
+                                ).otp_config?.step
+                            }
+                            onChange={(val: unknown) =>
+                                updateNested("otp_config", "step", Number(val))
+                            }
+                            style={{ width: "100%" }}
                         />
                     </div>
 
                     <div style={{ height: 16 }} />
 
                     {/* 高级设置 */}
-                    <Title heading={5} type="primary" style={{ marginBottom: 16 }}>高级设置</Title>
+                    <Title
+                        heading={5}
+                        type="primary"
+                        style={{ marginBottom: 16 }}
+                    >
+                        高级设置
+                    </Title>
                     <div style={{ marginBottom: 16 }}>
-                        <div style={{ marginBottom: 8, fontWeight: 500 }}>OpenVPN执行文件</div>
+                        <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                            OpenVPN执行文件
+                        </div>
                         <Space>
                             <Input
                                 placeholder="留空使用内置openvpn"
@@ -218,18 +341,36 @@ export default function VPNForm({
                                 }}
                                 style={{ width: 300 }}
                             />
-                            <Button type="secondary" theme="outline" onClick={handleSelectExecutable}>选择文件</Button>
+                            <Button
+                                type="secondary"
+                                theme="outline"
+                                onClick={handleSelectExecutable}
+                            >
+                                选择文件
+                            </Button>
                         </Space>
                     </div>
                     <div style={{ marginBottom: 24 }}>
-                        <div style={{ marginBottom: 8, fontWeight: 500 }}>网卡</div>
+                        <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                            网卡
+                        </div>
                         <Select
-                            value={(formValues as FormValues & { config?: { adapter?: string } }).config?.adapter || "本地连接"}
-                            onChange={(val: unknown) => updateNested("config", "adapter", val)}
-                            style={{ width: '100%' }}
+                            value={
+                                (
+                                    formValues as FormValues & {
+                                        config?: { adapter?: string }
+                                    }
+                                ).config?.adapter || "本地连接"
+                            }
+                            onChange={(val: unknown) =>
+                                updateNested("config", "adapter", val)
+                            }
+                            style={{ width: "100%" }}
                         >
                             {tapList.map((tap) => (
-                                <Select.Option key={tap.guid} value={tap.name}>{tap.name}</Select.Option>
+                                <Select.Option key={tap.guid} value={tap.name}>
+                                    {tap.name}
+                                </Select.Option>
                             ))}
                         </Select>
                     </div>
@@ -237,10 +378,25 @@ export default function VPNForm({
             </Card>
 
             {/* 固定底部按钮 */}
-            <div style={{ padding: '12px 24px', borderTop: '1px solid #e0e0e0', background: '#fff', textAlign: 'right' }}>
+            <div
+                style={{
+                    padding: "12px 24px",
+                    borderTop: "1px solid #e0e0e0",
+                    background: "#fff",
+                    textAlign: "right",
+                }}
+            >
                 <Space>
-                    <Button size="large" onClick={handleCancel}>取消</Button>
-                    <Button type="primary" size="large" onClick={() => handleSave(formValues)}>保存</Button>
+                    <Button size="large" onClick={handleCancel}>
+                        取消
+                    </Button>
+                    <Button
+                        type="primary"
+                        size="large"
+                        onClick={() => handleSave(formValues)}
+                    >
+                        保存
+                    </Button>
                 </Space>
             </div>
         </div>

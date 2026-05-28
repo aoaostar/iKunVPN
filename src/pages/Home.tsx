@@ -213,7 +213,6 @@ export default function Home() {
                                         size="small"
                                         type="danger"
                                         onClick={handleUninstallTap}
-                                        theme="outline"
                                     >
                                         卸载 TAP
                                     </Button>
@@ -222,7 +221,6 @@ export default function Home() {
                                         loading={installingTap}
                                         size="small"
                                         onClick={handleInstallTap}
-                                        theme="outline"
                                         disabled={tapInstalled}
                                     >
                                         安装 TAP
@@ -232,7 +230,6 @@ export default function Home() {
                                     size="small"
                                     loading={refreshing}
                                     onClick={handleRefreshTapList}
-                                    theme="outline"
                                 >
                                     刷新
                                 </Button>
